@@ -30,6 +30,7 @@ describe("Given that I am a user on login page", () => {
       const inputEmailUser = screen.getByTestId("employee-email-input");
       fireEvent.change(inputEmailUser, { target: { value: "pasunemail" } });
       expect(inputEmailUser.value).toBe("pasunemail");
+      //console.log("inputEmailUser.value:************************************* ", inputEmailUser.value);
 
       const inputPasswordUser = screen.getByTestId("employee-password-input");
       fireEvent.change(inputPasswordUser, { target: { value: "azerty" } });
@@ -153,26 +154,27 @@ describe("Given that I am a user on login page", () => {
       expect(screen.getByTestId("form-admin")).toBeTruthy();
     });
   });
-
+  //-----------------------------------------------------------------------------------------------
   describe("When I do fill fields in correct format and I click on admin button Login In", () => {
     test("Then I should be identified as an HR admin in app", () => {
       document.body.innerHTML = LoginUI();
       const inputData = {
         type: "Admin",
-        email: "johndoe@email.com",
+        email: "johndoe@email.com", //admin@company.tld ; mot de passe : admin
         password: "azerty",
         status: "connected",
       };
 
-      const inputEmailUser = screen.getByTestId("admin-email-input");
-      fireEvent.change(inputEmailUser, { target: { value: inputData.email } });
-      expect(inputEmailUser.value).toBe(inputData.email);
+      const inputEmailUser = screen.getByTestId("admin-email-input"); // ok
+      fireEvent.change(inputEmailUser, { target: { value: inputData.email } }); // ok
+
+      expect(inputEmailUser.value).toBe(inputData.email); // ok
 
       const inputPasswordUser = screen.getByTestId("admin-password-input");
       fireEvent.change(inputPasswordUser, {
         target: { value: inputData.password },
-      });
-      expect(inputPasswordUser.value).toBe(inputData.password);
+      }); //?
+      expect(inputPasswordUser.value).toBe(inputData.password); // ok
 
       const form = screen.getByTestId("form-admin");
 
@@ -202,10 +204,16 @@ describe("Given that I am a user on login page", () => {
         store,
       });
 
+      // expect(jest.fn()).toHaveBeenCalled()
+
+      // Expected number of calls: >= 1
+      // Received number of calls:    0
+      //const handleSubmit = jest.fn(login.handleSubmitAdmin);
       const handleSubmit = jest.fn(login.handleSubmitAdmin);
       login.login = jest.fn().mockResolvedValue({});
       form.addEventListener("submit", handleSubmit);
       fireEvent.submit(form);
+      //console.log("handleSubmit ----------------------------------: ", handleSubmit.mock.calls.length);
       expect(handleSubmit).toHaveBeenCalled();
       expect(window.localStorage.setItem).toHaveBeenCalled();
       expect(window.localStorage.setItem).toHaveBeenCalledWith(
