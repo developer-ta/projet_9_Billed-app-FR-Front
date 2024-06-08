@@ -36,6 +36,7 @@ class ApiEntity {
     this.api = api;
   }
   async select({selector, headers = {}}) {
+    //bill
     return await (this.api.get({url: `/${this.key}/${selector}`, headers: getHeaders(headers)}))
   }
   async list({headers = {}} = {}) {
@@ -55,18 +56,21 @@ class ApiEntity {
 
 
 class Store {
+  //list url : http://localhost:5678/auth/login
+  debugger;
   constructor() {
-    this.api = new Api({baseUrl: 'http://localhost:5678'})
+    this.api = new Api({ baseUrl: "http://localhost:5678" });
   }
 
-  user = uid => (new ApiEntity({key: 'users', api: this.api})).select({selector: uid})
-  users = () => new ApiEntity({key: 'users', api: this.api})
-  login = (data) => this.api.post({url: '/auth/login', data, headers: getHeaders({noAuthorization: true})})
+  user = (uid) => new ApiEntity({ key: "users", api: this.api }).select({ selector: uid });
+  users = () => new ApiEntity({ key: "users", api: this.api });
+  debugger;
+  login = (data) => this.api.post({ url: "/auth/login", data, headers: getHeaders({ noAuthorization: true }) });
 
-  ref = (path) => this.store.doc(path)
+  ref = (path) => this.store.doc(path);
 
-  bill = bid => (new ApiEntity({key: 'bills', api: this.api})).select({selector: bid})
-  bills = () => new ApiEntity({key: 'bills', api: this.api})
+  bill = (bid) => new ApiEntity({ key: "bills", api: this.api }).select({ selector: bid });
+  bills = () => new ApiEntity({ key: "bills", api: this.api });
 }
 
 export default new Store()
