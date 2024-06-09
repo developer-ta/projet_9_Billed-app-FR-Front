@@ -21,11 +21,16 @@ const row = (bill) => {
 };
 
 const rows = (data) => {
-  const antiChrono = (a, b) => (a.date < b.date ? 1 : -1);
+  //const antiChrono = (a, b) => (a.date < b.date ? 1 : -1);
+  const antiChrono = (a, b) => new Date(b.date) - new Date(a.date);
 
-  console.log("data: ", data);
   if (data && data.length) {
     data.sort(antiChrono);
+
+    console.log(
+      "data: 、、、、、、、、、",
+      data.map((a) => a.date)
+    );
     return data.map((bill) => row(bill)).join("");
   }
   return "";
