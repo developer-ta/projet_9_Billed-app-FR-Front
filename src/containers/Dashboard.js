@@ -94,14 +94,12 @@ export default class {
   handleEditTicket(e, bill, bills) {
     debugger;
     e.preventDefault;
-    //this.counterEditTicket = false;
+    
     if (this.id !== bill.id) {
       this.id = bill.id;
       this.counterEditTicket = 0;
     }
-    // if (this.id !== bill.id || this.counterEditTicket === undefined) this.counterEditTicket = 0;
-    console.log("counterEditTicket start ********** : ", this.counterEditTicket);
-    //if (this.id === undefined || this.id !== bill.id) this.id = bill.id;
+  
     if (this.counterEditTicket % 2 === 0) {
       bills.forEach((b) => {
         $(`#open-bill${b.id}`).css({ background: "#0D5AE5" });
@@ -111,7 +109,7 @@ export default class {
       $(".dashboard-right-container div").html(DashboardFormUI(bill));
       $(".vertical-navbar").css({ height: "150vh" });
       this.counterEditTicket++;
-      console.log(" this.counterEditTicket++; end in if: ", this.counterEditTicket);
+      
     } else {
       $(`#open-bill${bill.id}`).css({ background: "#0D5AE5" });
       console.log("counterEditTicket start in else  ********** : ", this.counterEditTicket);
@@ -126,7 +124,7 @@ export default class {
     $("#btn-accept-bill").click((e) => this.handleAcceptSubmit(e, bill));
     $("#btn-refuse-bill").click((e) => this.handleRefuseSubmit(e, bill));
 
-    //this.counterEditTicket = false;
+
   }
 
   handleAcceptSubmit = (e, bill) => {
