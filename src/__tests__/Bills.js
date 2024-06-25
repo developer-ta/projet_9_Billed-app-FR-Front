@@ -73,7 +73,6 @@ describe("Given I am connected as an employee", () => {
           email: "employee@test.tld",
         })
       );
-      return window.localStorage;
     };
     let mockOnNavigate = (pathname) => (document.body.innerHTML = ROUTES({ pathname }));
 
@@ -82,7 +81,7 @@ describe("Given I am connected as an employee", () => {
     let mockBills = null;
 
     beforeEach(() => {
-      mockLocalStorage().clear;
+      //mockLocalStorage().clear();
 
       mockBills = new Bills({
         document: mockDocument(),
@@ -91,7 +90,10 @@ describe("Given I am connected as an employee", () => {
         localStorage: mockLocalStorage(),
       });
     });
-
+    afterEach(() => {
+      document.body.innerHTML = "";
+      // mockLocalStorage()
+    });
     test("Then, should appear Bills list", async () => {
       // const mockPathname = "Bills";
 
@@ -111,7 +113,6 @@ describe("Given I am connected as an employee", () => {
     });
 
     test("Then, should appear NewBill", async () => {
-    
       await waitFor(() => screen.getByTestId("btn-new-bill"));
 
       const handleClickNewBill = jest.fn((e) => mockBills.handleClickNewBill(e));
