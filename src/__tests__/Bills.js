@@ -5,9 +5,10 @@ import { bills } from "../fixtures/bills.js";
 import Bills from "../containers/Bills.js";
 import { localStorageMock } from "../__mocks__/localStorage.js";
 import { ROUTES } from "../constants/routes.js";
-import { ready } from "jquery";
+import $ from "jquery";
 
 describe("Given I am connected as an employee", () => {
+  //1
   describe("When I am on Bills Page", () => {
     let mockHtml = (htmlRender) => {
       document.body.innerHTML = `<div id=root></div>`;
@@ -57,11 +58,20 @@ describe("Given I am connected as an employee", () => {
       expect(dates).toEqual(datesSorted);
     });
   });
-
+  //2
   describe("When I am on Bills Page 2", () => {
     let mockDocument = () => {
       document.body.innerHTML = `<div id=root>${BillsUI({ data: bills })}</div>`;
+
       document.title = "Bills";
+      let scriptBootstrap = document.createElement("script");
+      scriptBootstrap.src = "https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js";
+      scriptBootstrap.integrity = "sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl";
+      scriptBootstrap.crossOrigin = "anonymous";
+
+      // Append the script to the body or head
+      document.body.appendChild(scriptBootstrap);
+
       return document;
     };
     let mockLocalStorage = () => {
@@ -81,8 +91,6 @@ describe("Given I am connected as an employee", () => {
     let mockBills = null;
 
     beforeEach(() => {
-      //mockLocalStorage().clear();
-
       mockBills = new Bills({
         document: mockDocument(),
         onNavigate: mockOnNavigate,
@@ -91,32 +99,41 @@ describe("Given I am connected as an employee", () => {
       });
     });
     afterEach(() => {
-      document.body.innerHTML = "";
-      // mockLocalStorage()
+      //document.body.innerHTML = "";
+      jest.clearAllMocks();
     });
     test("Then, should appear Bills list", async () => {
-      // const mockPathname = "Bills";
-
       await waitFor(() => screen.getAllByTestId("icon-eye"));
-      const $iconEyes = screen.getAllByTestId("icon-eye");
-      mockBills.handleClickIconEye = jest.fn((iconEye) => iconEye);
-      // const handleClickIconEye = jest.fn((e) => mockBills.handleClickIconEye(e, $iconEye));
-
-      $iconEyes.forEach(($iconEye) => {
-        $iconEye.addEventListener("click", (e) => mockBills.handleClickIconEye(e, $iconEye));
+      jest.mock("jquery", () => {
+        const originalModule = jest.requireActual("jquery");
+        return {
+          ...originalModule,
+          modal: jest.fn(),
+        };
       });
+
+      const $iconEyes = screen.getAllByTestId("icon-eye");
+
+      let mockHandleClickIconEye = jest.fn((icon) => mockBills.handleClickIconEye(icon));
+      // mockHandleClickIconEye.mockReturnValue();
+      $iconEyes.forEach(($iconEye) => {
+        $iconEye.addEventListener("click", () => mockHandleClickIconEye($iconEye));
+      });
+
+      // let handleClickIconEyeSpy = jest.spyOn(mockBills, "handleClickIconEye").mockReturnValue("called");
       userEvent.click($iconEyes[0]);
-
+      //mockBills.handleClickIconEye();
+      await waitFor(() => $("#myModal"));
+      //expect($("#myModal").hasClass("show")).toBe(true);
       expect(mockBills.document.title).toEqual("Bills");
-
-      expect(mockBills.handleClickIconEye).toHaveBeenCalled();
+      expect(mockHandleClickIconEye).toHaveBeenCalled();
+      //  expect(mockBills.handleClickIconEye()).toEqual("called");
     });
 
     test("Then, should appear NewBill", async () => {
       await waitFor(() => screen.getByTestId("btn-new-bill"));
 
       const handleClickNewBill = jest.fn((e) => mockBills.handleClickNewBill(e));
-
       const $newBillBtn = screen.getByTestId("btn-new-bill");
 
       $newBillBtn.addEventListener("click", handleClickNewBill);
@@ -125,63 +142,7 @@ describe("Given I am connected as an employee", () => {
 
       expect(screen.getByText("Billed")).toBeTruthy();
       expect($newBillBtn).toBeTruthy();
-
       expect(handleClickNewBill).toHaveBeenCalled();
     });
-
-    //const handleShowTickets2 = jest.fn((e) => dashboard.handleShowTickets(e, bills, 2));
-    //const handleShowTickets3 = jest.fn((e) => dashboard.handleShowTickets(e, bills, 3));
-
-    //  const icon2 = screen.getByTestId("arrow-icon2");
-    //  const icon3 = screen.getByTestId("arrow-icon3");
-
-    //  icon1.addEventListener("click", handleShowTickets1);
-    //  userEvent.click(icon1);
-    //  expect(handleShowTickets1).toHaveBeenCalled();
-
-    //  await waitFor(() => screen.getByTestId(`open-bill47qAXb6fIm2zOKkLzMro`));
-    //  expect(screen.getByTestId(`open-bill47qAXb6fIm2zOKkLzMro`)).toBeTruthy();
-    //  icon2.addEventListener("click", handleShowTickets2);
-    //  userEvent.click(icon2);
-    //  expect(handleShowTickets2).toHaveBeenCalled();
-    //  await waitFor(() => screen.getByTestId(`open-billUIUZtnPQvnbFnB0ozvJh`));
-    //  expect(screen.getByTestId(`open-billUIUZtnPQvnbFnB0ozvJh`)).toBeTruthy();
-
-    //  icon3.addEventListener("click", handleShowTickets3);
-    //  userEvent.click(icon3);
-    //  expect(handleShowTickets3).toHaveBeenCalled();
-    //  await waitFor(() => screen.getByTestId(`open-billBeKy5Mo4jkmdfPGYpTxZ`));
-    //  expect(screen.getByTestId(`open-billBeKy5Mo4jkmdfPGYpTxZ`)).toBeTruthy();
   });
 });
-/**
-`
-    <div class='layout'>
-      ${VerticalLayout(120)}
-      <div class='content'>
-        <div class='content-header'>
-          <div class='content-title'> Mes notes de frais </div>
-          <button type="button" data-testid='btn-new-bill' class="btn btn-primary">Nouvelle note de frais</button>
-        </div>
-        <div id="data-table">
-        <table id="example" class="table table-striped" style="width:100%">
-          <thead>
-              <tr>
-                <th>Type</th>
-                <th>Nom</th>
-                <th>Date</th>
-                <th>Montant</th>
-                <th>Statut</th>
-                <th>Actions</th>
-              </tr>
-          </thead>
-          <tbody data-testid="tbody">
-            ${rows(bills)}
-          </tbody>
-          </table>
-        </div>
-      </div>
-      ${modal()}
-    </div>`;
-
-*/
