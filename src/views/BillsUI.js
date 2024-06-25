@@ -5,7 +5,7 @@ import LoadingPage from "./LoadingPage.js";
 import Actions from "./Actions.js";
 
 const row = (bill) => {
-  console.log(" bill.date;: ", bill.date);
+
   return `
     <tr>
       <td>${bill.type}</td>
@@ -27,10 +27,7 @@ const rows = (data) => {
   if (data && data.length) {
     data.sort(antiChrono);
 
-    console.log(
-      "data: 、、、、、、、、、",
-      data.map((a) => a.date)
-    );
+ 
     return data.map((bill) => row(bill)).join("");
   }
   return "";

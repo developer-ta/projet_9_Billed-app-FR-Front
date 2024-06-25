@@ -65,8 +65,6 @@ export const getStatus = (index) => {
 
 export default class {
   constructor({ document, onNavigate, store, bills, localStorage }) {
-    console.log("bills: ", bills);
-    debugger;
     new Logout({ localStorage, onNavigate });
     this.document = document;
     this.onNavigate = onNavigate;
@@ -75,12 +73,10 @@ export default class {
     this.billList.length !== 0 && this.initEvent(this.billList);
   }
   initEvent(bills) {
-  
     let filterBills = (status) => bills.filter((a) => a.status === status);
     $("#arrow-icon1").click((e) => this.handleShowTickets(e, filterBills("pending"), 1));
     $("#arrow-icon2").click((e) => this.handleShowTickets(e, filterBills("accepted"), 2));
     $("#arrow-icon3").click((e) => this.handleShowTickets(e, filterBills("refused"), 3));
-
   }
   handleClickIconEye = () => {
     const billUrl = $("#icon-eye-d").attr("data-bill-url");
@@ -94,12 +90,12 @@ export default class {
   handleEditTicket(e, bill, bills) {
     debugger;
     e.preventDefault;
-    
+
     if (this.id !== bill.id) {
       this.id = bill.id;
       this.counterEditTicket = 0;
     }
-  
+
     if (this.counterEditTicket % 2 === 0) {
       bills.forEach((b) => {
         $(`#open-bill${b.id}`).css({ background: "#0D5AE5" });
@@ -109,22 +105,18 @@ export default class {
       $(".dashboard-right-container div").html(DashboardFormUI(bill));
       $(".vertical-navbar").css({ height: "150vh" });
       this.counterEditTicket++;
-      
     } else {
       $(`#open-bill${bill.id}`).css({ background: "#0D5AE5" });
-      console.log("counterEditTicket start in else  ********** : ", this.counterEditTicket);
+
       $(".dashboard-right-container div").html(`
         <div id="big-billed-icon" data-testid="big-billed-icon"> ${BigBilledIcon} </div>
       `);
       $(".vertical-navbar").css({ height: "120vh" });
       this.counterEditTicket++;
-      console.log(" this.counterEditTicket++; end in else ----: ", this.counterEditTicket);
     }
     $("#icon-eye-d").click(this.handleClickIconEye);
     $("#btn-accept-bill").click((e) => this.handleAcceptSubmit(e, bill));
     $("#btn-refuse-bill").click((e) => this.handleRefuseSubmit(e, bill));
-
-
   }
 
   handleAcceptSubmit = (e, bill) => {

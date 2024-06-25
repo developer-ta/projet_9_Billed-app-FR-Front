@@ -63,6 +63,7 @@ describe('Given I am connected as an Admin', () => {
         document, onNavigate, store: null, bills:bills, localStorage: window.localStorage
       })
       document.body.innerHTML = DashboardUI({ data: { bills } })
+      console.log('dashboard: ', dashboard.document);
 
       const handleShowTickets1 = jest.fn((e) => dashboard.handleShowTickets(e, bills, 1))
       const handleShowTickets2 = jest.fn((e) => dashboard.handleShowTickets(e, bills, 2))
