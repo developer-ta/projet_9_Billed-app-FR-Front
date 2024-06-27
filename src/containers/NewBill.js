@@ -25,7 +25,7 @@ export default class NewBill {
     const filePath = e.target.value.split(/\\/g);
     const fileName = filePath[filePath.length - 1];
     const fileTypeName = fileName.split(".").reverse()[0];
-    const isMatchedFileType = ["png", "jpg", "jpeg "].includes(fileTypeName);
+    const isMatchedFileType = ["png", "jpg", "jpeg"].includes(fileTypeName);
     const $btnSubmit = document.querySelector("#btn-send-bill");
 
     debugger;
