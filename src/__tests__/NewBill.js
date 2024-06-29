@@ -88,12 +88,15 @@ expect(inputEmailUser.value).toBe('admin@example.com');
 expect(inputPasswordUser.value).toBe('password123'); */
       let mockFile = new File(["test blob file", "", ""], "profil.jpg", { type: "image.jpg" });
       const $fileInput = screen.getByTestId("file");
+      const $btnSubmit = screen.getByText("Envoyer");
+      // $btnSubmit = document.querySelector("#btn-send-bill");
       const mockHandleChangeFile = jest.spyOn(mockNewBill, "handleChangeFile");
       $fileInput.addEventListener("change", mockHandleChangeFile);
       fireEvent.change($fileInput, { target: { files: [mockFile] } });
 
       //expect($mockFormNewBill).toBeTruthy();
       expect($fileInput).toBeTruthy();
+      expect($btnSubmit.disabled).toBe(false);
       expect($fileInput.files).toBeTruthy();
       expect($fileInput.files[0]).toBe(mockFile);
       expect($fileInput.files[0].name).toBe("profil.jpg");

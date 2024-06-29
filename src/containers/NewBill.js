@@ -9,9 +9,9 @@ export default class NewBill {
     const formNewBill = this.document.querySelector(`form[data-testid="form-new-bill"]`);
     formNewBill.addEventListener("submit", this.handleSubmit);
     const errorSpanHtml = `<span class='error' data-testid="errorSpan">Veuillez télécharger uniquement des fichiers de type PNG, JPG ou JPEG.</span>`;
-    const file = this.document.querySelector(`input[data-testid="file"]`);
-    file.addEventListener("change", this.handleChangeFile);
-    file.parentElement.insertAdjacentHTML("afterend", errorSpanHtml);
+    const $fileInput = this.document.querySelector(`input[data-testid="file"]`);
+    $fileInput.addEventListener("change", this.handleChangeFile);
+    $fileInput.parentElement.insertAdjacentHTML("afterend", errorSpanHtml);
     this.$errorSpan = formNewBill.querySelector(`span[class='error']`);
     this.$errorSpan.style.display = "none";
     this.fileUrl = null;
@@ -22,9 +22,9 @@ export default class NewBill {
   handleChangeFile = (e) => {
     e.preventDefault();
     const file = this.document.querySelector(`input[data-testid="file"]`).files[0];
-    const filePath = e.target.value.split(/\\/g);
-    const fileName = filePath[filePath.length - 1];
-    const fileTypeName = fileName.split(".").reverse()[0];
+    // const filePath = e.target.value.split(/\\/g);
+    // const fileName = filePath[filePath.length - 1];
+    const fileTypeName = file.name.split(".").reverse()[0];
     const isMatchedFileType = ["png", "jpg", "jpeg"].includes(fileTypeName);
     const $btnSubmit = document.querySelector("#btn-send-bill");
 
