@@ -8,7 +8,7 @@ export default class NewBill {
     this.store = store;
     const formNewBill = this.document.querySelector(`form[data-testid="form-new-bill"]`);
     formNewBill.addEventListener("submit", this.handleSubmit);
-    const errorSpanHtml = `<span class='error'>Veuillez télécharger uniquement des fichiers de type PNG, JPG ou JPEG.</span>`;
+    const errorSpanHtml = `<span class='error' data-testid="errorSpan">Veuillez télécharger uniquement des fichiers de type PNG, JPG ou JPEG.</span>`;
     const file = this.document.querySelector(`input[data-testid="file"]`);
     file.addEventListener("change", this.handleChangeFile);
     file.parentElement.insertAdjacentHTML("afterend", errorSpanHtml);
