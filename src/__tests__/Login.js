@@ -4,12 +4,28 @@
 
 import LoginUI from "../views/LoginUI";
 import Login from "../containers/Login.js";
-import { ROUTES } from "../constants/routes";
-import { fireEvent, screen } from "@testing-library/dom";
+import { fireEvent, screen, waitFor } from "@testing-library/dom";
+import userEvent from "@testing-library/user-event";
+// import BillsUI from "../views/BillsUI.js";
+// import { bills } from "../fixtures/bills.js";
+// import Bills from "../containers/Bills.js";
+import { localStorageMock } from "../__mocks__/localStorage.js";
 
-describe("Given that I am a user on login page", () => {
-  describe("When I do not fill fields and I click on employee button Login In", () => {
-    test("Then It should renders Login page", () => {
+// import $ from "jquery";
+import mockStore from "../__mocks__/store";
+// import VerticalLayout from "../views/VerticalLayout.js";
+// import Router from "../app/Router.js";
+
+import { ROUTES, ROUTES_PATH } from "../constants/routes";
+
+//Scénario 1  : Test de l'Interface Utilisateur (UI)/Page de Login
+
+describe("Given : Je suis  un employé (non connecté) ", () => {
+  describe("When : je suis sur login page", () => {
+    afterEach(() => {
+      document.body.innerHTML = "";
+    });
+    test("Then : devrait afficher le formulaire de login l'employé", () => {
       document.body.innerHTML = LoginUI();
 
       const inputEmailUser = screen.getByTestId("employee-email-input");
@@ -19,57 +35,111 @@ describe("Given that I am a user on login page", () => {
       expect(inputPasswordUser.value).toBe("");
 
       const form = screen.getByTestId("form-employee");
-      const handleSubmit = jest.fn((e) => e.preventDefault());
+      expect(form).toBeTruthy();
+      // const handleSubmit = jest.fn((e) => e.preventDefault());
 
-      form.addEventListener("submit", handleSubmit);
-      fireEvent.submit(form);
-      expect(screen.getByTestId("form-employee")).toBeTruthy();
+      // form.addEventListener("submit", handleSubmit);
+      // fireEvent.submit(form);
     });
   });
-
-  describe("When I do fill fields in incorrect format and I click on employee button Login In", () => {
-    test("Then It should renders Login page", () => {
-      document.body.innerHTML = LoginUI();
-
-      const inputEmailUser = screen.getByTestId("employee-email-input");
-      fireEvent.change(inputEmailUser, { target: { value: "pasunemail" } });
-      expect(inputEmailUser.value).toBe("pasunemail");
-      //console.log("inputEmailUser.value:************************************* ", inputEmailUser.value);
-
-      const inputPasswordUser = screen.getByTestId("employee-password-input");
-      fireEvent.change(inputPasswordUser, { target: { value: "azerty" } });
-      expect(inputPasswordUser.value).toBe("azerty");
-
-      const form = screen.getByTestId("form-employee");
-      const handleSubmit = jest.fn((e) => e.preventDefault());
-
-      form.addEventListener("submit", handleSubmit);
-      fireEvent.submit(form);
-      expect(screen.getByTestId("form-employee")).toBeTruthy();
+  describe("When : Je suis sur login page , je entre des informations manquantes ou invalides pour le champ e-mail et clique sur Se connecter.(sans la forme chaîne@chaîne.cc)", () => {
+    afterEach(() => {
+      document.body.innerHTML = "";
     });
-  });
 
-  describe("When I do fill fields in correct format and I click on employee button Login In", () => {
-    test("Then I should be identified as an Employee in app", () => {
+    // document mock
+    document.body.innerHTML = LoginUI();
+
+    //localStorage mock
+    Object.defineProperty(window, "localStorage", { value: localStorageMock });
+    window.localStorage.setItem(
+      "user",
+      JSON.stringify({
+        type: "Employee",
+        email: "f@test.tld",
+      })
+    );
+
+    // onNavigate mock
+    const mockOnNavigate = (pathname) => (document.body.innerHTML = ROUTES({ pathname }));
+
+    test("Then : Je reste sur la page Login , Les messages d'erreur appropriés sont affichés et je suis invité à remplir le champ e-mail au bon format", () => {
       document.body.innerHTML = LoginUI();
-      const inputData = {
-        email: "johndoe@email.com",
-        password: "azerty",
-      };
-
-      const inputEmailUser = screen.getByTestId("employee-email-input");
-      fireEvent.change(inputEmailUser, { target: { value: inputData.email } });
-      expect(inputEmailUser.value).toBe(inputData.email);
-
-      const inputPasswordUser = screen.getByTestId("employee-password-input");
-      fireEvent.change(inputPasswordUser, {
-        target: { value: inputData.password },
+      const login = new Login({
+        document: document,
+        localStorage: localStorage,
+        onNavigate: mockOnNavigate,
+        PREVIOUS_LOCATION: "",
+        store: mockStore,
       });
-      expect(inputPasswordUser.value).toBe(inputData.password);
+      const inputEmailUser = screen.getByTestId("employee-email-input");
+      const btnLoginEmployee = screen.getByTestId("employee-login-button");
+      const handleSubmitEmployee = jest.fn((e) => login.handleSubmitEmployee(e));
+      btnLoginEmployee.addEventListener("click", handleSubmitEmployee);
+      fireEvent.change(inputEmailUser, { target: { value: "chaîne@chaîne" } });
+      fireEvent.click(btnLoginEmployee);
+      expect(screen.getByTestId("errorSpan-email").textContent).toBe(
+        "L'email que vous avez saisie est invalide. Veuillez réessayer"
+      );
+    });
+  });
+  describe("When : je entre des informations manquantes ou invalides pour le champ password (vide ) du login l'employé et clique sur le bouton Se connecter", () => {
+    afterEach(() => {
+      document.body.innerHTML = "";
+    });
 
-      const form = screen.getByTestId("form-employee");
+    // document mock
+    document.body.innerHTML = LoginUI();
 
-      // localStorage should be populated with form data
+    //localStorage mock
+    Object.defineProperty(window, "localStorage", { value: localStorageMock });
+    window.localStorage.setItem(
+      "user",
+      JSON.stringify({
+        type: "Employee",
+        email: "f@test.tld",
+      })
+    );
+
+    // onNavigate mock
+    const mockOnNavigate = (pathname) => (document.body.innerHTML = ROUTES({ pathname }));
+
+    test("Then : Je reste sur la page Login , Les messages d'erreur appropriés sont affichés et je suis invité à remplir le champ  au bon format", () => {
+      document.body.innerHTML = LoginUI();
+      const login = new Login({
+        document: document,
+        localStorage: localStorage,
+        onNavigate: mockOnNavigate,
+        PREVIOUS_LOCATION: "",
+        store: mockStore,
+      });
+      const inputPasswordUser = screen.getByTestId("employee-password-input");
+      const btnLoginEmployee = screen.getByTestId("employee-login-button");
+      const handleSubmitEmployee = jest.fn((e) => login.handleSubmitEmployee(e));
+      btnLoginEmployee.addEventListener("click", handleSubmitEmployee);
+      fireEvent.change(inputPasswordUser, { target: { value: "" } });
+      fireEvent.click(btnLoginEmployee);
+      expect(screen.getByTestId("errorSpan-password").textContent).toBe("Veuillez entrer votre mot de passe");
+
+      expect(inputPasswordUser.value).toBe("");
+    });
+  });
+  describe("When : :L'utilisateur entre des informations correctes ou valide pour les champs password  et email du login l'employé et clique sur le bouton Se connecter", () => {
+    afterEach(() => {
+      document.body.innerHTML = "";
+    });
+
+    test("Then :Je suis identifié comme employé dans l'application", () => {
+      //Préparation environnement de test
+      window.localStorage.clear();
+      document.body.innerHTML = LoginUI();
+      const userMock = {
+        type: "Employee",
+        email: "emloyee@email.com",
+        password: "azerty",
+        status: "connected",
+      };
+      const mockOnNavigate = (pathname) => (document.body.innerHTML = ROUTES({ pathname }));
       Object.defineProperty(window, "localStorage", {
         value: {
           getItem: jest.fn(() => null),
@@ -78,45 +148,153 @@ describe("Given that I am a user on login page", () => {
         writable: true,
       });
 
-      // we have to mock navigation to test it
-      const onNavigate = (pathname) => {
-        document.body.innerHTML = ROUTES({ pathname });
-      };
-
-      let PREVIOUS_LOCATION = "";
-
-      const store = jest.fn();
-
       const login = new Login({
-        document,
-        localStorage: window.localStorage,
-        onNavigate,
-        PREVIOUS_LOCATION,
-        store,
+        document: document,
+        localStorage: localStorage,
+        onNavigate: mockOnNavigate,
+        PREVIOUS_LOCATION: "",
+        store: jest.fn(),
       });
-
-      const handleSubmit = jest.fn(login.handleSubmitEmployee);
       login.login = jest.fn().mockResolvedValue({});
-      form.addEventListener("submit", handleSubmit);
-      fireEvent.submit(form);
-      expect(handleSubmit).toHaveBeenCalled();
+
+      //Simuler l'entrée utilisateur
+      const inputEmailUser = screen.getByTestId("employee-email-input");
+      fireEvent.change(inputEmailUser, { target: { value: userMock.email } });
+      expect(inputEmailUser.value).toBe(userMock.email);
+
+      const inputPasswordUser = screen.getByTestId("employee-password-input");
+      fireEvent.change(inputPasswordUser, { target: { value: userMock.password } });
+      expect(inputPasswordUser.value).toBe(userMock.password);
+
+      const btnLoginEmployee = screen.getByTestId("employee-login-button");
+      const handleSubmitEmployee = jest.fn((e) => login.handleSubmitEmployee(e));
+      btnLoginEmployee.addEventListener("click", handleSubmitEmployee);
+      fireEvent.click(btnLoginEmployee);
+      // test
+      expect(handleSubmitEmployee).toHaveBeenCalled();
       expect(window.localStorage.setItem).toHaveBeenCalled();
       expect(window.localStorage.setItem).toHaveBeenCalledWith(
         "user",
         JSON.stringify({
           type: "Employee",
-          email: inputData.email,
-          password: inputData.password,
+          email: userMock.email,
+          password: userMock.password,
           status: "connected",
         })
       );
     });
-
-    test("It should renders Bills page", () => {
-      expect(screen.getAllByText("Mes notes de frais")).toBeTruthy();
-    });
   });
 });
+
+//   describe("When I do not fill fields and I click on employee button Login In", () => {
+//     test("Then It should renders Login page", () => {
+//       document.body.innerHTML = LoginUI();
+
+//       const inputEmailUser = screen.getByTestId("employee-email-input");
+//       expect(inputEmailUser.value).toBe("");
+
+//       const inputPasswordUser = screen.getByTestId("employee-password-input");
+//       expect(inputPasswordUser.value).toBe("");
+
+//       const form = screen.getByTestId("form-employee");
+//       const handleSubmit = jest.fn((e) => e.preventDefault());
+
+//       form.addEventListener("submit", handleSubmit);
+//       fireEvent.submit(form);
+//       expect(screen.getByTestId("form-employee")).toBeTruthy();
+//     });
+//   });
+
+//   describe("When I do fill fields in incorrect format and I click on employee button Login In", () => {
+//     test("Then It should renders Login page", () => {
+//       document.body.innerHTML = LoginUI();
+
+//       const inputEmailUser = screen.getByTestId("employee-email-input");
+//       fireEvent.change(inputEmailUser, { target: { value: "pasunemail" } });
+//       expect(inputEmailUser.value).toBe("pasunemail");
+//       //console.log("inputEmailUser.value:************************************* ", inputEmailUser.value);
+
+//       const inputPasswordUser = screen.getByTestId("employee-password-input");
+//       fireEvent.change(inputPasswordUser, { target: { value: "azerty" } });
+//       expect(inputPasswordUser.value).toBe("azerty");
+
+//       const form = screen.getByTestId("form-employee");
+//       const handleSubmit = jest.fn((e) => e.preventDefault());
+
+//       form.addEventListener("submit", handleSubmit);
+//       fireEvent.submit(form);
+//       expect(screen.getByTestId("form-employee")).toBeTruthy();
+//     });
+//   });
+
+//   describe("When I do fill fields in correct format and I click on employee button Login In", () => {
+//     test("Then I should be identified as an Employee in app", () => {
+//       document.body.innerHTML = LoginUI();
+//       const inputData = {
+//         email: "johndoe@email.com",
+//         password: "azerty",
+//       };
+
+//       const inputEmailUser = screen.getByTestId("employee-email-input");
+//       fireEvent.change(inputEmailUser, { target: { value: inputData.email } });
+//       expect(inputEmailUser.value).toBe(inputData.email);
+
+//       const inputPasswordUser = screen.getByTestId("employee-password-input");
+//       fireEvent.change(inputPasswordUser, {
+//         target: { value: inputData.password },
+//       });
+//       expect(inputPasswordUser.value).toBe(inputData.password);
+
+//       const form = screen.getByTestId("form-employee");
+
+//       // localStorage should be populated with form data
+//       Object.defineProperty(window, "localStorage", {
+//         value: {
+//           getItem: jest.fn(() => null),
+//           setItem: jest.fn(() => null),
+//         },
+//         writable: true,
+//       });
+
+//       // we have to mock navigation to test it
+//       const onNavigate = (pathname) => {
+//         document.body.innerHTML = ROUTES({ pathname });
+//       };
+
+//       let PREVIOUS_LOCATION = "";
+
+//       const store = jest.fn();
+
+//       const login = new Login({
+//         document,
+//         localStorage: window.localStorage,
+//         onNavigate,
+//         PREVIOUS_LOCATION,
+//         store,
+//       });
+
+//       const handleSubmit = jest.fn(login.handleSubmitEmployee);
+//       login.login = jest.fn().mockResolvedValue({});
+//       form.addEventListener("submit", handleSubmit);
+//       fireEvent.submit(form);
+//       expect(handleSubmit).toHaveBeenCalled();
+//       expect(window.localStorage.setItem).toHaveBeenCalled();
+//       expect(window.localStorage.setItem).toHaveBeenCalledWith(
+//         "user",
+//         JSON.stringify({
+//           type: "Employee",
+//           email: inputData.email,
+//           password: inputData.password,
+//           status: "connected",
+//         })
+//       );
+//     });
+
+//     test("It should renders Bills page", () => {
+//       expect(screen.getAllByText("Mes notes de frais")).toBeTruthy();
+//     });
+//   });
+// });
 
 describe("Given that I am a user on login page", () => {
   describe("When I do not fill fields and I click on admin button Login In", () => {
