@@ -76,15 +76,14 @@ export default class Login {
       return errorSpans[i];
     };
     //pour email
-    let x = patternEmail.test($email.value.trim());
-    if (!patternEmail.test($email.value.trim())) {
+    if (!$email.value.trim()) {
+      errorMg["empty"] = "Veuillez entrer une adresse email valide";
+      handleErrorSpan(errorMg.empty, 0).style.display = "block";
+      isValide = false;
+    } else if (!patternEmail.test($email.value.trim())) {
       errorMg["invalid"] = "L'email que vous avez saisie est invalide. Veuillez réessayer";
 
       handleErrorSpan(errorMg.invalid, 0).style.display = "block";
-      isValide = false;
-    } else if (!$email.value.trim()) {
-      errorMg["empty"] = "Veuillez entrer une adresse email valide";
-      handleErrorSpan(errorMg.empty, 0).style.display = "block";
       isValide = false;
     } else if (isValide) {
       errorSpans[0].style.display = "none";

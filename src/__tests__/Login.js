@@ -35,11 +35,12 @@ describe("Given : Je suis  un employé (non connecté) ", () => {
       expect(inputPasswordUser.value).toBe("");
 
       const form = screen.getByTestId("form-employee");
-      expect(form).toBeTruthy();
-      // const handleSubmit = jest.fn((e) => e.preventDefault());
+      const handleSubmit = jest.fn((e) => e.preventDefault());
 
-      // form.addEventListener("submit", handleSubmit);
-      // fireEvent.submit(form);
+      form.addEventListener("submit", handleSubmit);
+      fireEvent.submit(form);
+      expect(handleSubmit).toHaveBeenCalled();
+      expect(form).toBeTruthy();
     });
   });
   describe("When : Je suis sur login page , je entre des informations manquantes ou invalides pour le champ e-mail et clique sur Se connecter.(sans la forme chaîne@chaîne.cc)", () => {
@@ -63,7 +64,7 @@ describe("Given : Je suis  un employé (non connecté) ", () => {
     // onNavigate mock
     const mockOnNavigate = (pathname) => (document.body.innerHTML = ROUTES({ pathname }));
 
-    test("Then : Je reste sur la page Login , Les messages d'erreur appropriés sont affichés et je suis invité à remplir le champ e-mail au bon format", () => {
+    test("Then : je reste sur la page Login , Les messages d'erreur appropriés sont affichés et je suis invité à remplir le champ e-mail au bon format", () => {
       document.body.innerHTML = LoginUI();
       const login = new Login({
         document: document,
@@ -73,14 +74,93 @@ describe("Given : Je suis  un employé (non connecté) ", () => {
         store: mockStore,
       });
       const inputEmailUser = screen.getByTestId("employee-email-input");
+      fireEvent.change(inputEmailUser, { target: { value: "chaîne@chaîne" } });
+      expect(inputEmailUser.value).toBe("chaîne@chaîne");
+
+      const inputPasswordUser = screen.getByTestId("employee-password-input");
+      fireEvent.change(inputPasswordUser, { target: { value: "azerty" } });
+      expect(inputPasswordUser.value).toBe("azerty");
+
       const btnLoginEmployee = screen.getByTestId("employee-login-button");
       const handleSubmitEmployee = jest.fn((e) => login.handleSubmitEmployee(e));
       btnLoginEmployee.addEventListener("click", handleSubmitEmployee);
-      fireEvent.change(inputEmailUser, { target: { value: "chaîne@chaîne" } });
       fireEvent.click(btnLoginEmployee);
       expect(screen.getByTestId("errorSpan-email").textContent).toBe(
         "L'email que vous avez saisie est invalide. Veuillez réessayer"
       );
+      const form = screen.getByTestId("form-employee");
+      const handleSubmit = jest.fn((e) => e.preventDefault());
+
+      form.addEventListener("submit", handleSubmit);
+      fireEvent.submit(form);
+      expect(handleSubmit).toHaveBeenCalled();
+      expect(form).toBeTruthy();
+    });
+    test("Then : je reste sur la page Login , Devrais retourner le résultat vrai c'est Remplir avec l'information correcte sinon retourner fausse comme résultat", () => {
+      //Préparation environnement de test
+      window.localStorage.clear();
+      document.body.innerHTML = LoginUI();
+      const userMock = {
+        type: "Employee",
+        email: "emloyee@email.com",
+        password: "azerty",
+        status: "connected",
+      };
+      const login = new Login({
+        document: document,
+        localStorage: localStorage,
+        onNavigate: mockOnNavigate,
+        PREVIOUS_LOCATION: "",
+        store: mockStore,
+      });
+
+      //Simuler l'entrée utilisateur
+      const inputEmailUser = screen.getByTestId("employee-email-input");
+      fireEvent.change(inputEmailUser, { target: { value: userMock.email } });
+      expect(inputEmailUser.value).toBe(userMock.email);
+      // email ok but password ok
+      const inputPasswordUser = screen.getByTestId("employee-password-input");
+      fireEvent.change(inputPasswordUser, { target: { value: userMock.password } });
+      expect(inputPasswordUser.value).toBe(userMock.password);
+      let isValideResult = login.validator(inputEmailUser, inputPasswordUser);
+      expect(isValideResult).toBe(true);
+      // email ok but password no
+      fireEvent.change(inputEmailUser, { target: { value: userMock.email } });
+      fireEvent.change(inputPasswordUser, { target: { value: " " } });
+      isValideResult = login.validator(inputEmailUser, inputPasswordUser);
+      expect(isValideResult).toBe(false);
+      // email no but password ok
+      fireEvent.change(inputEmailUser, { target: { value: "" } });
+      fireEvent.change(inputPasswordUser, { target: { value: userMock.password } });
+      isValideResult = login.validator(inputEmailUser, inputPasswordUser);
+      expect(isValideResult).toBe(false);
+      // email no but password no
+      fireEvent.change(inputEmailUser, { target: { value: "emloyee@emailcom" } });
+      fireEvent.change(inputPasswordUser, { target: { value: " " } });
+      isValideResult = login.validator(inputEmailUser, inputPasswordUser);
+      expect(isValideResult).toBe(false);
+
+      const form = screen.getByTestId("form-employee");
+      const handleSubmit = jest.fn((e) => e.preventDefault());
+
+      form.addEventListener("submit", handleSubmit);
+      fireEvent.submit(form);
+      expect(handleSubmit).toHaveBeenCalled();
+      expect(form).toBeTruthy();
+      // isValideResult = login.validator("emloyee@emailcom", "");
+      // expect(isValideResult).toBe(false);
+
+      // isValideResult = login.validator("emloyee@emailcom", userMock.password);
+      // expect(isValideResult).toBe(false);
+
+      // const btnLoginEmployee = screen.getByTestId("employee-login-button");
+      // const handleSubmitEmployee = jest.fn((e) => login.handleSubmitEmployee(e));
+      // btnLoginEmployee.addEventListener("click", handleSubmitEmployee);
+      // fireEvent.change(inputEmailUser, { target: { value: "chaîne@chaîne" } });
+      // fireEvent.click(btnLoginEmployee);
+      // expect(screen.getByTestId("errorSpan-email").textContent).toBe(
+      //   "L'email que vous avez saisie est invalide. Veuillez réessayer"
+      // );
     });
   });
   describe("When : je entre des informations manquantes ou invalides pour le champ password (vide ) du login l'employé et clique sur le bouton Se connecter", () => {
@@ -122,13 +202,18 @@ describe("Given : Je suis  un employé (non connecté) ", () => {
       expect(screen.getByTestId("errorSpan-password").textContent).toBe("Veuillez entrer votre mot de passe");
 
       expect(inputPasswordUser.value).toBe("");
+
+      const form = screen.getByTestId("form-employee");
+      const handleSubmit = jest.fn((e) => e.preventDefault());
+
+      form.addEventListener("submit", handleSubmit);
+      fireEvent.submit(form);
+      expect(handleSubmit).toHaveBeenCalled();
+      expect(form).toBeTruthy();
     });
   });
-  describe("When : :L'utilisateur entre des informations correctes ou valide pour les champs password  et email du login l'employé et clique sur le bouton Se connecter", () => {
-    afterEach(() => {
-      document.body.innerHTML = "";
-    });
 
+  describe("When : je entre des informations correctes ou valide pour les champs password  et email du login l'employé et clique sur le bouton Se connecter", () => {
     test("Then :Je suis identifié comme employé dans l'application", () => {
       //Préparation environnement de test
       window.localStorage.clear();
@@ -156,16 +241,16 @@ describe("Given : Je suis  un employé (non connecté) ", () => {
         store: jest.fn(),
       });
       login.login = jest.fn().mockResolvedValue({});
-
+      
       //Simuler l'entrée utilisateur
       const inputEmailUser = screen.getByTestId("employee-email-input");
       fireEvent.change(inputEmailUser, { target: { value: userMock.email } });
       expect(inputEmailUser.value).toBe(userMock.email);
-
+      
       const inputPasswordUser = screen.getByTestId("employee-password-input");
       fireEvent.change(inputPasswordUser, { target: { value: userMock.password } });
       expect(inputPasswordUser.value).toBe(userMock.password);
-
+      
       const btnLoginEmployee = screen.getByTestId("employee-login-button");
       const handleSubmitEmployee = jest.fn((e) => login.handleSubmitEmployee(e));
       btnLoginEmployee.addEventListener("click", handleSubmitEmployee);
@@ -182,6 +267,10 @@ describe("Given : Je suis  un employé (non connecté) ", () => {
           status: "connected",
         })
       );
+      expect(login.login).toHaveBeenCalled();
+    });
+    test("It should renders  bills page", () => {
+      expect(screen.queryByText("Mes notes de frais")).toBeTruthy();
     });
   });
 });
@@ -295,7 +384,7 @@ describe("Given : Je suis  un employé (non connecté) ", () => {
 //     });
 //   });
 // });
-
+//Admin
 describe("Given that I am a user on login page", () => {
   describe("When I do not fill fields and I click on admin button Login In", () => {
     test("Then It should renders Login page", () => {
