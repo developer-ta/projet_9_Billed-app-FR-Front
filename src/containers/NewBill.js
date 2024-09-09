@@ -55,7 +55,7 @@ export default class NewBill {
         this.fileUrl = fileUrl;
         this.fileName = fileName;
       })
-      .catch((error) => console.error(error));
+      .catch((error) => console.log(error));
   };
   handleSubmit = (e) => {
     e.preventDefault();
@@ -91,7 +91,7 @@ export default class NewBill {
         .then(() => {
           this.onNavigate(ROUTES_PATH["Bills"]);
         })
-        .catch((error) => console.error(error));
+        .catch((error) => console.log(error));
     }
   };
 }
