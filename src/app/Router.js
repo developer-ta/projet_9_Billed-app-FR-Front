@@ -36,7 +36,7 @@ export default () => {
 
       const bills = new Bills({ document, onNavigate, store, localStorage });
       bills
-        .getBills()
+        .getBills()//return promesse 
         .then((data) => {
           rootDiv.innerHTML = BillsUI({ data });
           activeIcons();

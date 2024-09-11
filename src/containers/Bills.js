@@ -21,7 +21,7 @@ export default class {
     this.onNavigate(ROUTES_PATH["NewBill"]);
   };
 
-  handleClickIconEye = ( icon) => {
+  handleClickIconEye = (icon) => {
     const billUrl = icon.getAttribute("data-bill-url");
     const imgWidth = Math.floor($("#modaleFile").width() * 0.5);
     const $modaleFile = $("#modaleFile");
@@ -38,7 +38,7 @@ export default class {
     if (this.store) {
       return this.store
         .bills()
-        .list()
+        .list() // si Promesse résolue exécuter then Sinon une promesse avec état rejeter
         .then((snapshot) => {
           const bills = snapshot.map((doc) => {
             try {
@@ -58,7 +58,7 @@ export default class {
               };
             }
           });
-          console.log("length", bills.length);
+          //console.log("length", bills.length);
           return bills;
         });
     }

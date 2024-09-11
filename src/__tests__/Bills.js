@@ -10,7 +10,9 @@ import mockStore from "../__mocks__/store";
 import VerticalLayout from "../views/VerticalLayout.js";
 import router from "../app/Router.js";
 import "@testing-library/jest-dom/extend-expect";
-
+// jest.mock("../app/Store.js", () => {
+//   mockStore;
+// });
 describe("Given I am connected as an employee", () => {
   //1
   describe("When I am on on Bills page but it is loading", () => {
@@ -208,25 +210,19 @@ describe("Given I am connected as an employee", () => {
   });
   //2.1
   describe("When I am on Bills Page 2.1", () => {
-    jest.mock("../app/Store.js", () => {
-      mockStore;
-    });
+    beforeEach(() => {
+      jest.mock("../app/Store.js", () => {
+        mockStore;
+      });
+      Object.defineProperty(window, "localStorage", { value: localStorageMock });
 
-    const mockOnNavigate = (data) => (document.body.innerHTML = `<div id=root>${BillsUI({ data })}</div>`);
-    Object.defineProperty(window, "localStorage", { value: localStorageMock });
-    window.localStorage.setItem(
-      "user",
-      JSON.stringify({
-        type: "Employee",
-        email: "f@test.tld",
-      })
-    );
-
-    const mockBills = new Bills({
-      document,
-      onNavigate: mockOnNavigate,
-      store: mockStore,
-      localStorage,
+      window.localStorage.setItem(
+        "user",
+        JSON.stringify({
+          type: "Employee",
+          email: "f@test.tld",
+        })
+      );
     });
 
     afterEach(() => {
@@ -234,10 +230,19 @@ describe("Given I am connected as an employee", () => {
       jest.clearAllMocks();
     });
 
-    test("Then, should appear Bills list", async () => {
+    test("Then, should appear Bills list ", async () => {
+      const mockOnNavigate = (data, error) =>
+        (document.body.innerHTML = `<div id=root>${BillsUI({ data, error })}</div>`);
+
+      const mockBills = new Bills({
+        document,
+        onNavigate: mockOnNavigate,
+        store: mockStore,
+        localStorage,
+      });
       const data = await mockBills.getBills();
-      mockBills.onNavigate(data);
-      console.log("data==================: ", data);
+      mockBills.onNavigate(data, "");
+      //console.log("data==================: ", data);
 
       document.title = "Bills";
 
@@ -259,6 +264,77 @@ describe("Given I am connected as an employee", () => {
       expect(mockBills.document.title).toEqual("Bills");
       expect(mockHandleClickIconEye).toHaveBeenCalled();
       //  expect(mockBills.handleClickIconEye()).toEqual("called");
+    });
+    test("Then, should appear getBills = () error occur ", async () => {
+      //1 div root
+      jest.mock("../containers/Bills.js");
+      document.body.innerHTML = `<div id=root></div>`;
+      //2 mockStore
+      const mockStore = {
+        bills: () => {
+          return {
+            list: () => {
+              return Promise.reject("Erreur 404");
+            },
+          };
+        },
+      };
+
+      // 3. Fonction mockOnNavigate
+      const mockOnNavigate = jest.fn();
+
+      //   Bills.getBills() //return promesse
+      //     .then((data) => {
+      //       rootDiv.innerHTML = BillsUI({ data });
+      //     })
+      //     .catch((error) => {
+      //       rootDiv.innerHTML = ROUTES({ pathname, error });
+      //     });
+      // };
+      //3.1 routing
+      //router();
+      //4 new Bills
+      const mockBills = new Bills({
+        document,
+        onNavigate: mockOnNavigate,
+        store: mockStore,
+        localStorage,
+      });
+      // Implementer la méthode getBills pour simuler la récupération
+      mockBills.getBills = jest.fn(() => {
+        return mockStore.bills().list();
+      });
+      try {
+        await mockBills.getBills();
+      } catch (error) {
+        const rootDiv = document.getElementById("root");
+        rootDiv.innerHTML = ROUTES({ pathname: ROUTES_PATH.Bills, error });
+        expect(rootDiv.innerHTML).toContain("Erreur 404");
+      }
+      // mockBills.getBills().catch((error) => {
+      //   const rootDiv = document.getElementById("root");
+      //   rootDiv.innerHTML = ROUTES({ pathname: ROUTES_PATH.Bills, error });
+      //   expect(rootDiv.innerHTML).toContain("Erreur 404");
+      // });
+      //window.onNavigate(ROUTES_PATH.Bills);
+
+      //mockBills.onNavigate(ROUTES_PATH.Bills);
+
+      //jest.requireActual("../containers/Bills.js");
+
+      //const error = await mockBills.getBills();
+      //console.log("error:------------------------------- ", error);
+      //mockBills.onNavigate(null, error);
+
+      await new Promise(process.nextTick);
+
+      document.title = "Bills";
+      await waitFor(() => screen.getByTestId("error-message"));
+      let messageError = screen.getByTestId("error-message").innerHTML;
+      //console.log("messageError ------------------------------------: ", messageError);
+      expect(screen.getByTestId("error-message")).toBeTruthy();
+      //expect(messageError).toBe("Erreur 404");
+      expect(mockBills.document.title).toEqual("Bills");
     });
   });
   // 3
