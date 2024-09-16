@@ -1,3 +1,7 @@
+/**
+ * @jest-environment jsdom
+ */
+
 import { fireEvent, screen, waitFor } from "@testing-library/dom";
 import userEvent from "@testing-library/user-event";
 import BillsUI from "../views/BillsUI.js";
@@ -5,7 +9,7 @@ import { bills } from "../fixtures/bills.js";
 import Bills from "../containers/Bills.js";
 import { localStorageMock } from "../__mocks__/localStorage.js";
 import { ROUTES, ROUTES_PATH } from "../constants/routes.js";
-import $ from "jquery";
+//import $ from "jquery";
 import mockStore from "../__mocks__/store";
 import VerticalLayout from "../views/VerticalLayout.js";
 import router from "../app/Router.js";
@@ -283,16 +287,6 @@ describe("Given I am connected as an employee", () => {
       // 3. Fonction mockOnNavigate
       const mockOnNavigate = jest.fn();
 
-      //   Bills.getBills() //return promesse
-      //     .then((data) => {
-      //       rootDiv.innerHTML = BillsUI({ data });
-      //     })
-      //     .catch((error) => {
-      //       rootDiv.innerHTML = ROUTES({ pathname, error });
-      //     });
-      // };
-      //3.1 routing
-      //router();
       //4 new Bills
       const mockBills = new Bills({
         document,
@@ -311,29 +305,15 @@ describe("Given I am connected as an employee", () => {
         rootDiv.innerHTML = ROUTES({ pathname: ROUTES_PATH.Bills, error });
         expect(rootDiv.innerHTML).toContain("Erreur 404");
       }
-      // mockBills.getBills().catch((error) => {
-      //   const rootDiv = document.getElementById("root");
-      //   rootDiv.innerHTML = ROUTES({ pathname: ROUTES_PATH.Bills, error });
-      //   expect(rootDiv.innerHTML).toContain("Erreur 404");
-      // });
-      //window.onNavigate(ROUTES_PATH.Bills);
-
-      //mockBills.onNavigate(ROUTES_PATH.Bills);
-
-      //jest.requireActual("../containers/Bills.js");
-
-      //const error = await mockBills.getBills();
-      //console.log("error:------------------------------- ", error);
-      //mockBills.onNavigate(null, error);
 
       await new Promise(process.nextTick);
 
       document.title = "Bills";
       await waitFor(() => screen.getByTestId("error-message"));
       let messageError = screen.getByTestId("error-message").innerHTML;
-      //console.log("messageError ------------------------------------: ", messageError);
+
       expect(screen.getByTestId("error-message")).toBeTruthy();
-      //expect(messageError).toBe("Erreur 404");
+
       expect(mockBills.document.title).toEqual("Bills");
     });
   });
@@ -394,50 +374,3 @@ describe("Given I am connected as an employee", () => {
     });
   });
 });
-
-// get
-// describe("When an error occurs on API", () => {
-//   beforeEach(() => {
-//     jest.spyOn(mockStore, "bills");
-//     Object.defineProperty(window, "localStorage", { value: localStorageMock });
-//     window.localStorage.setItem(
-//       "user",
-//       JSON.stringify({
-//         type: "Admin",
-//         email: "a@a",
-//       })
-//     );
-//     const root = document.createElement("div");
-//     root.setAttribute("id", "root");
-//     document.body.appendChild(root);
-//     router();
-//   });
-//   test("fetches bills from an API and fails with 404 message error", async () => {
-//     mockStore.bills.mockImplementationOnce(() => {
-//       return {
-//         list: () => {
-//           return Promise.reject(new Error("Erreur 404"));
-//         },
-//       };
-//     });
-//     window.onNavigate(ROUTES_PATH.Dashboard);
-//     await new Promise(process.nextTick);
-//     const message = await screen.getByText(/Erreur 404/);
-//     expect(message).toBeTruthy();
-//   });
-
-//   test("fetches messages from an API and fails with 500 message error", async () => {
-//     mockStore.bills.mockImplementationOnce(() => {
-//       return {
-//         list: () => {
-//           return Promise.reject(new Error("Erreur 500"));
-//         },
-//       };
-//     });
-
-//     window.onNavigate(ROUTES_PATH.Dashboard);
-//     await new Promise(process.nextTick);
-//     const message = await screen.getByText(/Erreur 500/);
-//     expect(message).toBeTruthy();
-//   });
-// });

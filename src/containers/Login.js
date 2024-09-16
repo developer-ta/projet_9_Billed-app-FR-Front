@@ -11,19 +11,19 @@ export default class Login {
     this.store = store;
     this.formEmployee = this.document.querySelector(`form[data-testid="form-employee"]`);
     this.formEmployee.addEventListener("submit", this.handleSubmitEmployee);
-    const formAdmin = this.document.querySelector(`form[data-testid="form-admin"]`);
-    formAdmin.addEventListener("submit", this.handleSubmitAdmin);
-
     this.$employeeEmailInput = this.formEmployee.querySelector(`input[data-testid="employee-email-input"]`);
     this.$employeePasswordInput = this.formEmployee.querySelector(`input[data-testid="employee-password-input"]`);
     const errorSpanEmailHtml = `<span class='error' data-testid="errorSpan-email"></span>`;
     const errorSpanPasswordHtml = `<span class='error' data-testid="errorSpan-password"></span>`;
     this.$employeeEmailInput.insertAdjacentHTML("afterend", errorSpanEmailHtml);
     this.$employeePasswordInput.insertAdjacentHTML("afterend", errorSpanPasswordHtml);
+
+    this.formAdmin = this.document.querySelector(`form[data-testid="form-admin"]`);
+    this.formAdmin.addEventListener("submit", this.handleSubmitAdmin);
   }
   handleSubmitEmployee = (e) => {
     e.preventDefault();
-
+    // 1 Dépendance l'alterne validator()
     let isValidForm = this.validator(this.$employeeEmailInput, this.$employeePasswordInput);
 
     if (!isValidForm) return;
@@ -35,37 +35,47 @@ export default class Login {
       status: "connected",
     };
     this.localStorage.setItem("user", JSON.stringify(user));
-    this.login(user)
-      .then(() => {
-        this.onNavigate(ROUTES_PATH["Bills"]);
-        this.PREVIOUS_LOCATION = ROUTES_PATH["Bills"];
-        PREVIOUS_LOCATION = this.PREVIOUS_LOCATION;
-        this.document.body.style.backgroundColor = "#fff";
-      })
-      .catch((err) => this.createUser(user));
+    return (
+      //  2 Dépendance l’interne login()
+      this.login(user) &&
+      this.login(user)
+        .then(() => {
+          this.onNavigate(ROUTES_PATH["Bills"]);
+          this.PREVIOUS_LOCATION = ROUTES_PATH["Bills"];
+          PREVIOUS_LOCATION = this.PREVIOUS_LOCATION;
+          this.document.body.style.backgroundColor = "#fff";
+        })
+        .catch((err) => this.createUser(user))
+    );
   };
 
   handleSubmitAdmin = (e) => {
     e.preventDefault();
+    const $adminEmail = this.formAdmin.querySelector(`input[data-testid="admin-email-input"]`);
+    const $adminPassword = this.formAdmin.querySelector(`input[data-testid="admin-password-input"]`);
     const user = {
       type: "Admin",
-      email: e.target.querySelector(`input[data-testid="admin-email-input"]`).value,
-      password: e.target.querySelector(`input[data-testid="admin-password-input"]`).value,
+      email: $adminEmail.value,
+      password: $adminPassword.value,
       status: "connected",
     };
+
+    if (!this.validator($adminEmail, $adminPassword)) return;
     this.localStorage.setItem("user", JSON.stringify(user));
-    this.login(user)
-      .catch((err) => this.createUser(user))
-      .then(() => {
-        this.onNavigate(ROUTES_PATH["Dashboard"]);
-        this.PREVIOUS_LOCATION = ROUTES_PATH["Dashboard"];
-        PREVIOUS_LOCATION = this.PREVIOUS_LOCATION;
-        document.body.style.backgroundColor = "#fff";
-      });
+    return (
+      this.login(user) &&
+      this.login(user)
+        .catch((err) => this.createUser(user))
+        .then(() => {
+          this.onNavigate(ROUTES_PATH["Dashboard"]);
+          this.PREVIOUS_LOCATION = ROUTES_PATH["Dashboard"];
+          PREVIOUS_LOCATION = this.PREVIOUS_LOCATION;
+          document.body.style.backgroundColor = "#fff";
+        })
+    );
   };
 
   validator = ($email, $passWord) => {
-    debugger;
     const patternEmail = /^([a-zA-Z0-9_\.\-])+\@(([a-zA-Z0-9\-])+\.)+([a-zA-Z0-9]{2,4})+$/;
     const errorMg = {};
     let isValide = true;
@@ -102,6 +112,7 @@ export default class Login {
   // not need to cover this function by tests
   login = (user) => {
     if (this.store) {
+      // 3 login 1 Dépendance Externe  store.login()
       // return Promise.then(obj) | null
       return this.store
         .login(
@@ -109,7 +120,7 @@ export default class Login {
             email: user.email,
             password: user.password,
           })
-        )
+        ) //si résolue
         .then(({ jwt }) => {
           localStorage.setItem("jwt", jwt);
         });
@@ -121,7 +132,7 @@ export default class Login {
   // not need to cover this function by tests
   createUser = (user) => {
     if (this.store) {
-      return this.store
+      return this.store //3 login 1 Dépendance Externe  store.users().create()
         .users()
         .create({
           data: JSON.stringify({

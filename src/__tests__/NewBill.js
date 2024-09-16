@@ -2,16 +2,13 @@
  * @jest-environment jsdom
  */
 
-import NewBillUI from "../views/NewBillUI.js";
+
 import NewBill from "../containers/NewBill.js";
 import { fireEvent, screen, waitFor, queryByTestId } from "@testing-library/dom";
-import userEvent from "@testing-library/user-event";
-import BillsUI from "../views/BillsUI.js";
-import { bills } from "../fixtures/bills.js";
-import Bills from "../containers/Bills.js";
+
 import { localStorageMock } from "../__mocks__/localStorage.js";
 import { ROUTES, ROUTES_PATH } from "../constants/routes.js";
-import $ from "jquery";
+
 import mockStore from "../__mocks__/store";
 import Router from "../app/Router";
 
