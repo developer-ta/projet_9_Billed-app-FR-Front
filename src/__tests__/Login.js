@@ -36,7 +36,7 @@ describe("Given that I am a user on login page 1", () => {
           email: "f@test.tld",
         })
       );
-      
+
       mockLocalStorage = window.localStorage;
       jest.spyOn(window.localStorage, "setItem");
     });
@@ -152,10 +152,17 @@ describe("Given that I am a user on login page 1", () => {
       fireEvent.submit($form);
 
       expect(MockHandleSubmitEmployee).toHaveBeenCalled();
-      //expect(mockLocalStorage.setItem).toHaveBeenCalled();
+      expect(mockLocalStorage.setItem).toHaveBeenCalled();
       //expect(mockLocalStorage.setItem).toHaveBeenCalledWith("jwt", "Connexion ok");
       expect(mockNewLogin.store.login).toHaveBeenCalled();
       expect(screen.getByText("Billed")).toBeTruthy();
+
+      // if login return null
+      mockNewLogin.store = "";
+      //fireEvent.submit($form);
+      //expect(MockHandleSubmitEmployee).toHaveBeenCalled();
+      expect(mockNewLogin.login()).toBeNull();
+      expect(mockNewLogin.createUser()).toBeNull();
     });
   });
 });
