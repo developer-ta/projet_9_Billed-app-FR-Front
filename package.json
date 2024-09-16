@@ -5,6 +5,7 @@
     "coverage": "yarn jest --coverage"
   },
   "jest": {
+    "testEnvironment": "jsdom",
     "verbose": false,
     "setupFiles": [
       "./setup-jest.js"
