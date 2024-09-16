@@ -187,7 +187,7 @@ export default class {
         .bills()
         .update({ data: JSON.stringify(bill), selector: bill.id })
         .then((bill) => bill)
-        .catch(console.log);
+        .catch();
     }
   };
 }

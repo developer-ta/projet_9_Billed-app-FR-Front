@@ -45,7 +45,7 @@ describe("Given that I am a user on login page 1", () => {
       mockDocument.body.innerHTML = "";
     });
 
-    test("Then I handles employee login submission", () => {
+    test("Then I handles employee login submission store ", () => {
       //dom
       mockDocument.body.innerHTML = `<div id=root>${ROUTES({ pathname: ROUTES_PATH["Login"] })}</div>`;
 
@@ -107,6 +107,7 @@ describe("Given that I am a user on login page 1", () => {
         const rootDiv = document.getElementById("root");
         rootDiv.innerHTML = BillsUI({ bills: mockBills });
       });
+
       mockStore = {
         login: jest.fn().mockResolvedValue({ jwt: "Connexion ok" }),
         users: () => {
@@ -163,6 +164,78 @@ describe("Given that I am a user on login page 1", () => {
       //expect(MockHandleSubmitEmployee).toHaveBeenCalled();
       expect(mockNewLogin.login()).toBeNull();
       expect(mockNewLogin.createUser()).toBeNull();
+    });
+    test("Then I handles employee login submission login reject", async () => {
+      //dom
+      mockDocument.body.innerHTML = `<div id=root>${ROUTES({ pathname: ROUTES_PATH["Login"] })}</div>`;
+
+      //dependance injection
+
+      mockOnNavigate = jest.fn(() => {
+        const rootDiv = document.getElementById("root");
+        rootDiv.innerHTML = BillsUI({ bills: mockBills });
+      });
+
+      // mockStore = {
+      //   login: jest.fn().mockRejectedValue(new Error("not connection error 404")),
+      //   users: () => {
+      //     return {
+      //       create: jest.fn().mockResolvedValue(),
+      //     };
+      //   },
+      // };
+      mockStore = {
+        login: jest.fn().mockResolvedValue({}),
+        users: () => {
+          return {
+            create: jest.fn().mockResolvedValue(),
+          };
+        },
+      };
+
+      //instance Login
+      mockNewLogin = new Login({
+        document: mockDocument,
+        localStorage: window.localStorage,
+        onNavigate: mockOnNavigate,
+        PREVIOUS_LOCATION: "",
+        store: mockStore,
+      });
+      //if  input correct
+      mockInputData = {
+        type: "Employee",
+        email: "employee@email.com", //admin@company.tld ; mot de passe : admin
+        password: "azerty",
+        status: "connected",
+      };
+      //jest.spyOn(mockNewLogin, "createUser");
+      //jest.spyOn(mockNewLogin, "login");
+      // const $inputEmailUser = screen.getByTestId("admin-email-input"); // ok
+      // fireEvent.change($inputEmailUser, { target: { value: mockInputData.email } }); // ok
+
+      // expect($inputEmailUser.value).toBe(mockInputData.email); // ok
+
+      // const $inputPasswordUser = screen.getByTestId("admin-password-input");
+      // fireEvent.change($inputPasswordUser, {
+      //   target: { value: mockInputData.password },
+      // });
+      // expect($inputPasswordUser.value).toBe(mockInputData.password); // ok
+
+      // const $form = screen.getByTestId("form-admin");
+
+      // const MockHandleSubmitEmployee = jest.fn((e) => mockNewLogin.handleSubmitEmployee(e));
+
+      // $form.addEventListener("submit", MockHandleSubmitEmployee);
+
+      // fireEvent.submit($form);
+
+      const mockUser = mockInputData;
+      mockNewLogin.login = jest.fn().mockResolvedValue("new user");
+      const message = await mockNewLogin.createUser(mockUser);
+      // expect(mockNewLogin.createUser).toHaveBeenCalled();
+      //expect(mockNewLogin.login).toHaveBeenCalled();
+      expect(message).toBe("new user");
+      expect(screen.getByText("Billed")).toBeTruthy();
     });
   });
 });
