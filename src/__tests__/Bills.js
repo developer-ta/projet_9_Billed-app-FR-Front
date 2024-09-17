@@ -269,6 +269,88 @@ describe("Given I am connected as an employee", () => {
       expect(mockHandleClickIconEye).toHaveBeenCalled();
       //  expect(mockBills.handleClickIconEye()).toEqual("called");
     });
+    test("Then, should appear Bill 4", async () => {
+      //1 div root
+
+      document.body.innerHTML = `<div id=root></div>`;
+      //2 mockStore
+      const mockStore = {
+        bills: jest.fn(() => {
+          return {
+            list: () => {
+              return Promise.resolve([new Error("snapshot")]);
+            },
+          };
+        }),
+      };
+
+      // 3. Fonction mockOnNavigate
+      const mockOnNavigate = jest.fn();
+
+      //4 new Bills
+      const billsInstance = new Bills({
+        document,
+        onNavigate: mockOnNavigate,
+        store: mockStore,
+        localStorage,
+      });
+      let res = await billsInstance.getBills();
+
+      // expect(billsInstance.store.bills).toHaveBeenCalled();
+      expect(res).not.toBeNull();
+
+      billsInstance.store = null;
+      res = await billsInstance.getBills();
+      expect(res).toBeUndefined();
+    });
+    test("Then, should appear getBills = () error occur ", async () => {
+      //1 div root
+      jest.mock("../containers/Bills.js");
+      document.body.innerHTML = `<div id=root></div>`;
+      //2 mockStore
+      const mockStore = {
+        bills: () => {
+          return {
+            list: () => {
+              return Promise.reject("Erreur 404");
+            },
+          };
+        },
+      };
+
+      // 3. Fonction mockOnNavigate
+      const mockOnNavigate = jest.fn();
+
+      //4 new Bills
+      const mockBills = new Bills({
+        document,
+        onNavigate: mockOnNavigate,
+        store: mockStore,
+        localStorage,
+      });
+      // Implementer la méthode getBills pour simuler la récupération
+      mockBills.getBills = jest.fn(() => {
+        return mockStore.bills().list();
+      });
+      try {
+        await mockBills.getBills();
+      } catch (error) {
+        const rootDiv = document.getElementById("root");
+        rootDiv.innerHTML = ROUTES({ pathname: ROUTES_PATH.Bills, error });
+        expect(rootDiv.innerHTML).toContain("Erreur 404");
+      }
+
+      await new Promise(process.nextTick);
+
+      document.title = "Bills";
+      await waitFor(() => screen.getByTestId("error-message"));
+      let messageError = screen.getByTestId("error-message").innerHTML;
+
+      expect(screen.getByTestId("error-message")).toBeTruthy();
+
+      expect(mockBills.document.title).toEqual("Bills");
+    });
+
     test("Then, should appear getBills = () error occur ", async () => {
       //1 div root
       jest.mock("../containers/Bills.js");
@@ -318,59 +400,4 @@ describe("Given I am connected as an employee", () => {
     });
   });
   // 3
-  describe("When I am on Bills Page 3", () => {
-    const mockNewBillUI = () => ROUTES({ pathname: "#employee/bill/new", loading: true });
-    let mockStoreNewBill = mockStore;
-
-    const mockDocument = () => {
-      document.body.innerHTML = `<div id=root>${mockNewBillUI()}</div>`;
-      document.title = "Bills";
-
-      console.log("document: ", document);
-
-      return document;
-    };
-
-    const mockOnNavigate = (pathname) => (document.body.innerHTML = ROUTES({ pathname }));
-
-    const mockLocalStorage = () => {
-      Object.defineProperty(window, "localStorage", { value: localStorageMock });
-      window.localStorage.setItem(
-        "user",
-        JSON.stringify({
-          type: "Employee",
-          email: "f@test.tld",
-        })
-      );
-    };
-
-    beforeEach(() => {
-      mockLocalStorage();
-      mockNewBillUI = new NewBill({
-        document: mockDocument(),
-        onNavigate: mockOnNavigate,
-        store: mockStoreNewBill,
-        localStorage: window.localStorage,
-      });
-
-      test("Then, should appear NewBill 3", async () => {
-        await waitFor(() => screen.getByTestId("btn-new-bill"));
-
-        console.log("document: ", document.body.innerHTML);
-        const handleClickNewBill = jest.fn((e) => mockBills.handleClickNewBill(e));
-        const $newBillBtn = screen.getByTestId("btn-new-bill");
-
-        $newBillBtn.addEventListener("click", handleClickNewBill);
-
-        userEvent.click($newBillBtn);
-
-        expect(screen.getByText("Billed")).toBeTruthy();
-        expect(screen.getByTestId("icon-window")).toBeTruthy();
-        expect(screen.getByTestId("icon-mail")).toBeTruthy();
-        //  expect(screen.getByTestId("tbody")).toBeTruthy();
-        expect($newBillBtn).toBeTruthy();
-        expect(handleClickNewBill).toHaveBeenCalled();
-      });
-    });
-  });
 });

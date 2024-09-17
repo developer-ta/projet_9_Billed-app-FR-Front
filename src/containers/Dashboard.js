@@ -88,7 +88,7 @@ export default class {
   };
 
   handleEditTicket(e, bill, bills) {
-    debugger;
+   
     e.preventDefault;
 
     if (this.id !== bill.id) {

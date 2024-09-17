@@ -2,7 +2,6 @@
  * @jest-environment jsdom
  */
 
-
 import NewBill from "../containers/NewBill.js";
 import { fireEvent, screen, waitFor, queryByTestId } from "@testing-library/dom";
 
@@ -131,5 +130,59 @@ expect(inputPasswordUser.value).toBe('password123'); */
     });
   });
 
-  describe("When I am on Bills Page 3", () => {});
+  describe("When I am on Bills Page 3", () => {
+    const mockNewBillUI = () => ROUTES({ pathname: "#employee/bill/new", loading: true });
+    let mockStoreNewBill = mockStore;
+
+    const mockDocument = () => {
+      document.body.innerHTML = `<div id=root>${mockNewBillUI()}</div>`;
+      document.title = "Bills";
+
+      return document;
+    };
+
+    const mockOnNavigate = (pathname) => (document.body.innerHTML = ROUTES({ pathname }));
+
+    const mockLocalStorage = () => {
+      Object.defineProperty(window, "localStorage", { value: localStorageMock });
+      window.localStorage.setItem(
+        "user",
+        JSON.stringify({
+          type: "Employee",
+          email: "f@test.tld",
+        })
+      );
+    };
+
+    beforeEach(() => {
+      mockLocalStorage();
+      mockNewBillUI = new NewBill({
+        document: mockDocument(),
+        onNavigate: mockOnNavigate,
+        store: mockStoreNewBill,
+        localStorage: window.localStorage,
+      });
+
+      test("Then, should appear NewBill 3", async () => {
+        await waitFor(() => screen.getByTestId("btn-new-bill"));
+
+        console.log("document: ", document.body.innerHTML);
+        const handleClickNewBill = jest.fn((e) => mockBills.handleClickNewBill(e));
+        const $newBillBtn = screen.getByTestId("btn-new-bill");
+
+        $newBillBtn.addEventListener("click", handleClickNewBill);
+
+        userEvent.click($newBillBtn);
+
+        expect(screen.getByText("Billed")).toBeTruthy();
+        expect(screen.getByTestId("icon-window")).toBeTruthy();
+        expect(screen.getByTestId("icon-mail")).toBeTruthy();
+        //  expect(screen.getByTestId("tbody")).toBeTruthy();
+        expect($newBillBtn).toBeTruthy();
+        expect(handleClickNewBill).toHaveBeenCalled();
+      });
+    });
+  });
 });
+
+// 3
