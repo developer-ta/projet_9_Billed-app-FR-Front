@@ -95,6 +95,101 @@ describe("Given I am connected as an Admin", () => {
       await waitFor(() => screen.getByTestId(`open-billBeKy5Mo4jkmdfPGYpTxZ`));
       expect(screen.getByTestId(`open-billBeKy5Mo4jkmdfPGYpTxZ`)).toBeTruthy();
     });
+    test("Then, tickets list should be unfolding, and cards should appear", async () => {
+      const onNavigate = (pathname) => {
+        document.body.innerHTML = ROUTES({ pathname });
+      };
+
+      Object.defineProperty(window, "localStorage", { value: localStorageMock });
+      window.localStorage.setItem(
+        "user",
+        JSON.stringify({
+          type: "Admin",
+        })
+      );
+
+      const dashboard = new Dashboard({
+        document,
+        onNavigate,
+        store: null,
+        bills: bills,
+        localStorage: window.localStorage,
+      });
+      document.body.innerHTML = DashboardUI({ data: { bills } });
+      // if this.index =undefined
+      //jest.spyOn(dashboard, "handleShowTickets");
+      dashboard.index = 1;
+      dashboard.counterShowTickets = 3;
+      const result1 = dashboard.handleShowTickets(null, bills, 1);
+      const result2 = dashboard.handleShowTickets(null, bills, 2);
+
+      expect(result1).toBe(bills);
+      expect(result2).toBe(bills);
+    });
+
+    test("Then, should appear Bill 4", async () => {
+      //2 mockStore
+      const mockStore = {
+        bills: jest.fn(() => {
+          return {
+            list: () => {
+              return Promise.reject(new Error("snapshot"));
+            },
+          };
+        }),
+      };
+
+      // 3. Fonction mockOnNavigate
+      const mockOnNavigate = jest.fn();
+
+      //4 new
+      document.body.innerHTML = DashboardUI({ data: { bills } });
+      const dashboard = new Dashboard({
+        document,
+        onNavigate: mockOnNavigate,
+        store: mockStore,
+        bills: bills,
+        localStorage,
+      });
+      try {
+        await dashboard.getBillsAllUsers();
+      } catch (error) {
+        expect(error.message).toContain("snapshot");
+      }
+
+      // expect(billsInstance.store.bills).toHaveBeenCalled();
+    });
+    test("Then, should appear Bill 4", async () => {
+      const mockStore = {
+        bills: jest.fn(() => {
+          return {
+            list: () => {
+              return Promise.resolve([new Error("snapshot")]);
+            },
+          };
+        }),
+      };
+
+      // 3. Fonction mockOnNavigate
+      const mockOnNavigate = jest.fn();
+
+      //4 new
+      document.body.innerHTML = DashboardUI({ data: { bills } });
+      const dashboard = new Dashboard({
+        document,
+        onNavigate: mockOnNavigate,
+        store: mockStore,
+        bills: bills,
+        localStorage,
+      });
+      dashboard.initEvent(bills);
+      jest.spyOn(dashboard, "handleShowTickets");
+      const icon1 = screen.getByTestId("arrow-icon1");
+      userEvent.click(icon1);
+      expect(dashboard.handleShowTickets).toHaveBeenCalled();
+
+      // expect(billsInstance.store.bills).toHaveBeenCalled();
+    });
   });
 
   describe("When I am on Dashboard page and I click on edit icon of a card", () => {
@@ -119,7 +214,7 @@ describe("Given I am connected as an Admin", () => {
         localStorage: window.localStorage,
       });
       document.body.innerHTML = DashboardUI({ data: { bills } });
-      
+
       const handleShowTickets1 = jest.fn((e) => dashboard.handleShowTickets(e, bills, 1));
       const icon1 = screen.getByTestId("arrow-icon1");
       icon1.addEventListener("click", handleShowTickets1);
@@ -246,6 +341,36 @@ describe("Given I am connected as Admin, and I am on Dashboard page, and I click
 
 describe("Given I am connected as Admin and I am on Dashboard page and I clicked on a bill", () => {
   describe("When I click on the icon eye", () => {
+    test("A modal should open", () => {
+      Object.defineProperty(window, "localStorage", { value: localStorageMock });
+      window.localStorage.setItem(
+        "user",
+        JSON.stringify({
+          type: "Admin",
+        })
+      );
+      document.body.innerHTML = DashboardFormUI(bills[0]);
+      const onNavigate = (pathname) => {
+        document.body.innerHTML = ROUTES({ pathname });
+      };
+      const store = null;
+      const dashboard = new Dashboard({
+        document,
+        onNavigate,
+        store,
+        bills,
+        localStorage: window.localStorage,
+      });
+
+      const handleClickIconEye = jest.fn(dashboard.handleClickIconEye);
+      const eye = screen.getByTestId("icon-eye-d");
+      eye.addEventListener("click", handleClickIconEye);
+      userEvent.click(eye);
+      expect(handleClickIconEye).toHaveBeenCalled();
+
+      const modale = screen.getByTestId("modaleFileAdmin");
+      expect(modale).toBeTruthy();
+    });
     test("A modal should open", () => {
       Object.defineProperty(window, "localStorage", { value: localStorageMock });
       window.localStorage.setItem(
