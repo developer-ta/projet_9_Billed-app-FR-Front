@@ -61,7 +61,7 @@ const rows = (data) => {
 };
 
 export default ({ data: bills, loading, error }) => {
-  console.log("data ui *****************************: ", bills);
+ 
   const modal = () => `
     <div class="modal fade" id="modaleFile" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
       <div class="modal-dialog modal-dialog-centered modal-lg" role="document">

@@ -71,7 +71,6 @@ describe("Given I am connected as an employee", () => {
 
     //test level newBille Dowland file event
     test("Then ... test newBille event handleChangeFile", () => {
-
       let mockFile = new File(["test blob file", "", ""], "profil.jpg", { type: "image.jpg" });
       const $fileInput = screen.getByTestId("file");
       const $btnSubmit = screen.getByText("Envoyer");
@@ -106,6 +105,34 @@ describe("Given I am connected as an employee", () => {
 
       expect($fileInput.files[0].name).toBe("profil.txt");
     });
+
+    test("Then ... test newBille event handleChangeFile if correct ", () => {
+      let mockFile = new File(["test blob file"], "profil.png", {
+        type: "text/plain",
+        lastModified: new Date(),
+      });
+      //2 mockStore
+      const mockStore = {
+        bills: () => {
+          return {
+            create: () => {
+              return Promise.reject("Erreur 404");
+            },
+          };
+        },
+      };
+      mockNewBill.store = mockStore;
+      const $fileInput = screen.getByTestId("file");
+
+      const mockHandleChangeFile = jest.spyOn(mockNewBill, "handleChangeFile");
+      $fileInput.addEventListener("change", mockHandleChangeFile);
+      fireEvent.change($fileInput, { target: { files: [mockFile] } });
+
+      expect(mockHandleChangeFile).toHaveBeenCalled();
+
+      expect($fileInput.files[0].name).toBe("profil.png");
+    });
+
     test("Then ... test newBille event handleSubmit", () => {
       const $mockFormNewBill = screen.getByTestId("form-new-bill");
       const $fileInput = screen.getByTestId("file");

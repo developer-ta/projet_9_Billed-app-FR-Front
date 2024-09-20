@@ -68,7 +68,7 @@ describe("Given I am connected as an employee", () => {
   //5
   describe("When I am on Bills Page", () => {
     let isLoading = true;
-    let billsDataList = [];
+    let mockBills = [];
 
     const mockHtml = (htmlRender) => {
       document.body.innerHTML = `<div id=root></div>`;
@@ -78,15 +78,15 @@ describe("Given I am connected as an employee", () => {
     afterEach(() => (document.body.innerHTML = ""));
 
     test("Then , Loading page should be rendered", () => {
-      mockHtml(BillsUI({ data: billsDataList, loading: isLoading }));
+      mockHtml(BillsUI({ data: mockBills, loading: isLoading }));
 
       expect(screen.getByText("Loading...")).toBeTruthy();
       expect(screen.getByText("Billed")).toBeTruthy();
     });
 
     test("Then , bills table should be rendered", () => {
-      billsDataList = bills;
-      mockHtml(BillsUI({ data: billsDataList }));
+      mockBills = bills;
+      mockHtml(BillsUI({ data: mockBills }));
 
       expect(screen.getByText("Billed")).toBeTruthy();
     });
@@ -99,16 +99,17 @@ describe("Given I am connected as an employee", () => {
     });
 
     test("Then bills should be ordered from earliest to latest", () => {
-      billsDataList = bills;
-      mockHtml(BillsUI({ data: billsDataList }));
+      mockBills = bills;
+      mockHtml(BillsUI({ data: mockBills }));
 
-      const dates = screen
+      const resultDates = screen
         .getAllByText(/^(19|20)\d\d[- /.](0[1-9]|1[012])[- /.](0[1-9]|[12][0-9]|3[01])$/i)
         .map((a) => a.innerHTML);
       const antiChrono = (a, b) => (a < b ? 1 : -1);
-      const datesSorted = [...dates].sort(antiChrono);
+      // const datesSorted = [...dates].sort(antiChrono);
+      const datesSorted = mockBills.map((data) => data.date).sort(antiChrono);
 
-      expect(dates).toEqual(datesSorted);
+      expect(resultDates).toEqual(datesSorted);
     });
   });
   //2
