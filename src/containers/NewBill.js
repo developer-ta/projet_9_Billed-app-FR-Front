@@ -1,6 +1,7 @@
 import { ROUTES_PATH } from "../constants/routes.js";
 import Logout from "./Logout.js";
 
+
 export default class NewBill {
   constructor({ document, onNavigate, store, localStorage }) {
     this.document = document;
@@ -15,7 +16,7 @@ export default class NewBill {
     this.$errorSpan = formNewBill.querySelector(`span[class='error']`);
     this.$errorSpan.style.display = "none";
     this.fileUrl = null;
-    this.fileName = null;
+   // this.fileName = null;
     this.billId = null;
     new Logout({ document, localStorage, onNavigate });
   }
@@ -53,7 +54,7 @@ export default class NewBill {
        
         this.billId = key;
         this.fileUrl = fileUrl;
-        this.fileName = fileName;
+        //this.fileName = fileName;
       })
       .catch((error) => console.log(error));
   };
@@ -62,12 +63,14 @@ export default class NewBill {
   
 
     const email = JSON.parse(localStorage.getItem("user")).email;
+    let date = e.target.querySelector(`input[data-testid="datepicker"]`).value;
     const bill = {
       email,
       type: e.target.querySelector(`select[data-testid="expense-type"]`).value,
       name: e.target.querySelector(`input[data-testid="expense-name"]`).value,
       amount: parseInt(e.target.querySelector(`input[data-testid="amount"]`).value),
-      date: e.target.querySelector(`input[data-testid="datepicker"]`).value,
+      date: date,
+
       vat: e.target.querySelector(`input[data-testid="vat"]`).value,
       pct: parseInt(e.target.querySelector(`input[data-testid="pct"]`).value) || 20,
       commentary: e.target.querySelector(`textarea[data-testid="commentary"]`).value,

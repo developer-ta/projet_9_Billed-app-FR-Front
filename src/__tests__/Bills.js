@@ -11,12 +11,9 @@ import { localStorageMock } from "../__mocks__/localStorage.js";
 import { ROUTES, ROUTES_PATH } from "../constants/routes.js";
 //import $ from "jquery";
 import mockStore from "../__mocks__/store";
-import VerticalLayout from "../views/VerticalLayout.js";
 import router from "../app/Router.js";
 import "@testing-library/jest-dom/extend-expect";
-// jest.mock("../app/Store.js", () => {
-//   mockStore;
-// });
+
 describe("Given I am connected as an employee", () => {
   //1
   describe("When I am on on Bills page but it is loading", () => {

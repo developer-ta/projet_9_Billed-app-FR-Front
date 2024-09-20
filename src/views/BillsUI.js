@@ -5,7 +5,6 @@ import LoadingPage from "./LoadingPage.js";
 import Actions from "./Actions.js";
 
 const row = (bill) => {
-
   return `
     <tr>
       <td>${bill.type}</td>
@@ -21,19 +20,48 @@ const row = (bill) => {
 };
 
 const rows = (data) => {
-  //const antiChrono = (a, b) => (a.date < b.date ? 1 : -1);
-  const antiChrono = (a, b) => new Date(b.date) - new Date(a.date);
-
+  const antiChrono = (a, b) => (a.date < b.date ? 1 : -1);
+  //const antiChrono = (a, b) => (a < b ? 1 : -1);
+  // const datesSorted = [...dates].sort(antiChrono);
+  //const antiChrono = (a, b) => new Date(b.date) - new Date(a.date);
+  // const antiChrono = (a, b) => new Date(a.date).valueOf() - new Date(b.date).valueOf();
+  const mois = {
+    Jan: "Jan",
+    Fév: "Feb",
+    Mar: "Mar",
+    Avr: "Apr",
+    Mai: "May",
+    Jui: "Jun",
+    Juil: "Jul",
+    Aoû: "Aug",
+    Sep: "Sep",
+    Oct: "Oct",
+    Nov: "Nov",
+    Déc: "Dec",
+  };
   if (data && data.length) {
-    data.sort(antiChrono);
+    const dataIndexesSorted = data
+      .map((d, index) => {
+        return {
+          //convertir forma date fr to en
+          date: new Date(
+            d.date.replace(/Jan|Fév|Mar|Avr|Mai|Jui|Juil|Aoû|Sep|Oct|Nov|Déc/gi, (m) => mois[m])
+          ).valueOf(),
+          index: index,
+        };
+      })
+      .sort(antiChrono);
 
- 
-    return data.map((bill) => row(bill)).join("");
+    const res = dataIndexesSorted.map(({ index }) => data[index]);
+  
+
+    return res.map((d) => row(d)).join("");
   }
   return "";
 };
 
 export default ({ data: bills, loading, error }) => {
+  console.log("data ui *****************************: ", bills);
   const modal = () => `
     <div class="modal fade" id="modaleFile" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
       <div class="modal-dialog modal-dialog-centered modal-lg" role="document">

@@ -71,17 +71,7 @@ describe("Given I am connected as an employee", () => {
 
     //test level newBille Dowland file event
     test("Then ... test newBille event handleChangeFile", () => {
-      /**
-// 填写表单字段
-fireEvent.change(inputEmailUser, { target: { value: 'admin@example.com' } });
-fireEvent.change(inputPasswordUser, { target: { value: 'password123' } });
 
-// 提交表单
-fireEvent.submit(form);
-
-// 验证
-expect(inputEmailUser.value).toBe('admin@example.com');
-expect(inputPasswordUser.value).toBe('password123'); */
       let mockFile = new File(["test blob file", "", ""], "profil.jpg", { type: "image.jpg" });
       const $fileInput = screen.getByTestId("file");
       const $btnSubmit = screen.getByText("Envoyer");
