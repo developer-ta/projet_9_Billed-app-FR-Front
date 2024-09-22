@@ -16,205 +16,10 @@ import mockStore from "../__mocks__/store";
 
 import { ROUTES, ROUTES_PATH } from "../constants/routes";
 
-//Page Login employee
-//original 1
+//Page Login
+
+// employee
 describe("Given : Je suis un utilisateur non connecté sur la page de login avec le formulaire employé. ", () => {
-  //original
-  describe("When I do fill fields in correct format and I click on Employee button Login In", () => {
-    let mockDocument, mockBills, mockOnNavigate, mockLocalStorage, mockNewLogin, mockStore, mockInputData;
-    // mockPREVIOUS_LOCATION ,
-    beforeEach(async () => {
-      mockDocument = document;
-      mockBills = bills;
-
-      Object.defineProperty(window, "localStorage", { value: localStorageMock });
-
-      window.localStorage.setItem(
-        "user",
-        JSON.stringify({
-          type: "Employee",
-          email: "f@test.tld",
-        })
-      );
-
-      mockLocalStorage = window.localStorage;
-      jest.spyOn(window.localStorage, "setItem");
-    });
-    afterEach(() => {
-      mockLocalStorage.clear();
-      mockDocument.body.innerHTML = "";
-    });
-
-    test("Then I handles employee login submission store ", () => {
-      //dom
-      mockDocument.body.innerHTML = `<div id=root>${ROUTES({ pathname: ROUTES_PATH["Login"] })}</div>`;
-
-      //dependance injection
-
-      mockOnNavigate = jest.fn(() => {
-        const rootDiv = document.getElementById("root");
-        rootDiv.innerHTML = BillsUI({ bills: mockBills });
-      });
-
-      mockStore = { login: jest.fn().mockResolvedValue({}) };
-
-      //instance Login
-      mockNewLogin = new Login({
-        document: mockDocument,
-        localStorage: window.localStorage,
-        onNavigate: mockOnNavigate,
-        PREVIOUS_LOCATION: "",
-        store: mockStore,
-      });
-      //if  input correct
-      mockInputData = {
-        type: "Employee",
-        email: "employee@email.com", //admin@company.tld ; mot de passe : admin
-        password: "azerty",
-        status: "connected",
-      };
-
-      const $inputEmailUser = screen.getByTestId("admin-email-input"); // ok
-      fireEvent.change($inputEmailUser, { target: { value: mockInputData.email } }); // ok
-
-      expect($inputEmailUser.value).toBe(mockInputData.email); // ok
-
-      const $inputPasswordUser = screen.getByTestId("admin-password-input");
-      fireEvent.change($inputPasswordUser, {
-        target: { value: mockInputData.password },
-      });
-      expect($inputPasswordUser.value).toBe(mockInputData.password); // ok
-
-      const $form = screen.getByTestId("form-admin");
-
-      const MockHandleSubmitEmployee = jest.fn((e) => mockNewLogin.handleSubmitEmployee(e));
-
-      $form.addEventListener("submit", MockHandleSubmitEmployee);
-      fireEvent.submit($form);
-
-      expect(MockHandleSubmitEmployee).toHaveBeenCalled();
-      //expect(window.localStorage.setItem).toHaveBeenCalled();
-      expect(mockLocalStorage.setItem).toHaveBeenCalled();
-      expect(screen.getByText("Billed")).toBeTruthy();
-    });
-    test("Then I handles employee login submission", () => {
-      //dom
-      mockDocument.body.innerHTML = `<div id=root>${ROUTES({ pathname: ROUTES_PATH["Login"] })}</div>`;
-
-      //dependance injection
-
-      mockOnNavigate = jest.fn(() => {
-        const rootDiv = document.getElementById("root");
-        rootDiv.innerHTML = BillsUI({ bills: mockBills });
-      });
-
-      mockStore = {
-        login: jest.fn().mockResolvedValue({ jwt: "Connexion ok" }),
-        users: () => {
-          return {
-            create: jest.fn().mockResolvedValue(),
-          };
-        },
-      };
-
-      //instance Login
-      mockNewLogin = new Login({
-        document: mockDocument,
-        localStorage: window.localStorage,
-        onNavigate: mockOnNavigate,
-        PREVIOUS_LOCATION: "",
-        store: mockStore,
-      });
-      //if  input correct
-      mockInputData = {
-        type: "Employee",
-        email: "employee@email.com",
-        password: "azerty",
-        status: "connected",
-      };
-      // jest.spyOn(mockStore, "mockStore.login");
-      const $inputEmailUser = screen.getByTestId("admin-email-input"); // ok
-      fireEvent.change($inputEmailUser, { target: { value: mockInputData.email } }); // ok
-
-      expect($inputEmailUser.value).toBe(mockInputData.email); // ok
-
-      const $inputPasswordUser = screen.getByTestId("admin-password-input");
-      fireEvent.change($inputPasswordUser, {
-        target: { value: mockInputData.password },
-      });
-      expect($inputPasswordUser.value).toBe(mockInputData.password); // ok
-
-      const $form = screen.getByTestId("form-admin");
-
-      const MockHandleSubmitEmployee = jest.fn((e) => mockNewLogin.handleSubmitEmployee(e));
-
-      $form.addEventListener("submit", MockHandleSubmitEmployee);
-
-      fireEvent.submit($form);
-
-      expect(MockHandleSubmitEmployee).toHaveBeenCalled();
-      expect(mockLocalStorage.setItem).toHaveBeenCalled();
-      //expect(mockLocalStorage.setItem).toHaveBeenCalledWith("jwt", "Connexion ok");
-      expect(mockNewLogin.store.login).toHaveBeenCalled();
-      expect(screen.getByText("Billed")).toBeTruthy();
-
-      // if login return null
-      mockNewLogin.store = "";
-      //fireEvent.submit($form);
-      //expect(MockHandleSubmitEmployee).toHaveBeenCalled();
-      expect(mockNewLogin.login()).toBeNull();
-      expect(mockNewLogin.createUser()).toBeNull();
-    });
-    test("Then I handles employee login submission login reject", async () => {
-      //dom
-      mockDocument.body.innerHTML = `<div id=root>${ROUTES({ pathname: ROUTES_PATH["Login"] })}</div>`;
-
-      //dependance injection
-
-      mockOnNavigate = jest.fn(() => {
-        const rootDiv = document.getElementById("root");
-        rootDiv.innerHTML = BillsUI({ bills: mockBills });
-      });
-
-      mockStore = {
-        login: jest.fn().mockResolvedValue({}),
-        users: () => {
-          return {
-            create: jest.fn().mockResolvedValue(),
-          };
-        },
-      };
-
-      //instance Login
-      mockNewLogin = new Login({
-        document: mockDocument,
-        localStorage: window.localStorage,
-        onNavigate: mockOnNavigate,
-        PREVIOUS_LOCATION: "",
-        store: mockStore,
-      });
-      //if  input correct
-      mockInputData = {
-        type: "Employee",
-        email: "employee@email.com",
-        password: "azerty",
-        status: "connected",
-      };
-
-      const mockUser = mockInputData;
-      mockNewLogin.login = jest.fn().mockResolvedValue("new user");
-      const message = await mockNewLogin.createUser(mockUser);
-
-      expect(message).toBe("new user");
-      expect(screen.getByText("Billed")).toBeTruthy();
-    });
-  });
-});
-
-//correction 1
-describe("Given : Je suis un utilisateur non connecté sur la page de login avec le formulaire employé. ", () => {
-  // Scénario 1 :
-
   describe(" Module de connexion employé : Login.js", () => {
     //Préparer l'environnement Simuler
     // L'état initial  test
@@ -479,9 +284,7 @@ describe("Given : Je suis un utilisateur non connecté sur la page de login avec
       });
     });
   });
-});
 
-describe("Given : Je suis  un employé (non connecté) ", () => {
   describe("When : je entre des informations correctes ou valide pour les champs password  et email du login l'employé et clique sur le bouton Se connecter", () => {
     test("Then :Je suis identifié comme employé dans l'application", () => {
       //Préparation environnement de test
@@ -543,67 +346,142 @@ describe("Given : Je suis  un employé (non connecté) ", () => {
     });
   });
 
-  test("Then, handleSubmitEmployee ", async () => {
-    //mock
-    jest.mock("../containers/Login.js");
+  describe("When I do fill fields in correct format and I click on Employee button Login In", () => {
+    let mockDocument, mockBills, mockOnNavigate, mockLocalStorage, mockNewLogin, mockStore, mockInputData;
+    // mockPREVIOUS_LOCATION ,
+    beforeEach(async () => {
+      mockDocument = document;
+      mockBills = bills;
 
-    //2 mockStore
-    jest.mock("../app/Store.js", () => {
-      mockStore;
+      Object.defineProperty(window, "localStorage", { value: localStorageMock });
+
+      window.localStorage.setItem(
+        "user",
+        JSON.stringify({
+          type: "Employee",
+          email: "f@test.tld",
+        })
+      );
+
+      mockLocalStorage = window.localStorage;
+      jest.spyOn(window.localStorage, "setItem");
     });
-    Object.defineProperty(window, "localStorage", { value: localStorageMock });
+    afterEach(() => {
+      mockLocalStorage.clear();
+      mockDocument.body.innerHTML = "";
+    });
 
-    window.localStorage.setItem(
-      "user",
-      JSON.stringify({
+    test("Then I handles employee login submission", () => {
+      //dom
+      mockDocument.body.innerHTML = `<div id=root>${ROUTES({ pathname: ROUTES_PATH["Login"] })}</div>`;
+
+      //dependance injection
+
+      mockOnNavigate = jest.fn(() => {
+        const rootDiv = document.getElementById("root");
+        rootDiv.innerHTML = BillsUI({ bills: mockBills });
+      });
+
+      mockStore = {
+        login: jest.fn().mockResolvedValue({ jwt: "Connexion ok" }),
+        users: () => {
+          return {
+            create: jest.fn().mockResolvedValue(),
+          };
+        },
+      };
+
+      //instance Login
+      mockNewLogin = new Login({
+        document: mockDocument,
+        localStorage: window.localStorage,
+        onNavigate: mockOnNavigate,
+        PREVIOUS_LOCATION: "",
+        store: mockStore,
+      });
+      //if  input correct
+      mockInputData = {
         type: "Employee",
-        email: "f@test.tld",
-      })
-    );
-    //1 div root
-    document.body.innerHTML = `<div id=root>${ROUTES({ pathname: ROUTES_PATH["Login"] })}</div>`;
+        email: "employee@email.com",
+        password: "azerty",
+        status: "connected",
+      };
+      // jest.spyOn(mockStore, "mockStore.login");
+      const $inputEmailUser = screen.getByTestId("employee-email-input"); // ok
+      fireEvent.change($inputEmailUser, { target: { value: mockInputData.email } }); // ok
 
-    // 3. Fonction mockOnNavigate
-    const mockOnNavigate = jest.fn(() => {
-      const rootDiv = document.getElementById("root");
-      rootDiv.innerHTML = BillsUI({ bills });
+      expect($inputEmailUser.value).toBe(mockInputData.email); // ok
+
+      const $inputPasswordUser = screen.getByTestId("employee-password-input");
+      fireEvent.change($inputPasswordUser, {
+        target: { value: mockInputData.password },
+      });
+      expect($inputPasswordUser.value).toBe(mockInputData.password); // ok
+
+      const $form = screen.getByTestId("form-employee");
+
+      const MockHandleSubmitEmployee = jest.fn((e) => mockNewLogin.handleSubmitEmployee(e));
+
+      $form.addEventListener("submit", MockHandleSubmitEmployee);
+
+      fireEvent.submit($form);
+
+      expect(MockHandleSubmitEmployee).toHaveBeenCalled();
+      expect(mockLocalStorage.setItem).toHaveBeenCalled();
+      //expect(mockLocalStorage.setItem).toHaveBeenCalledWith("jwt", "Connexion ok");
+      expect(mockNewLogin.store.login).toHaveBeenCalled();
+      expect(screen.getByText("Billed")).toBeTruthy();
+
+      // if login return null
+      mockNewLogin.store = "";
+      //fireEvent.submit($form);
+      //expect(MockHandleSubmitEmployee).toHaveBeenCalled();
+      expect(mockNewLogin.login()).toBeNull();
+      expect(mockNewLogin.createUser()).toBeNull();
     });
+    test("Then I handles employee login submission login reject", async () => {
+      //dom
+      mockDocument.body.innerHTML = `<div id=root>${ROUTES({ pathname: ROUTES_PATH["Login"] })}</div>`;
 
-    //4 new Bills
-    const mockLogin = new Login({
-      document,
-      onNavigate: mockOnNavigate,
-      store: mockStore,
-      localStorage,
-      PREVIOUS_LOCATION,
+      //dependance injection
+
+      mockOnNavigate = jest.fn(() => {
+        const rootDiv = document.getElementById("root");
+        rootDiv.innerHTML = BillsUI({ bills: mockBills });
+      });
+
+      mockStore = {
+        login: jest.fn().mockResolvedValue({}),
+        users: () => {
+          return {
+            create: jest.fn().mockResolvedValue(),
+          };
+        },
+      };
+
+      //instance Login
+      mockNewLogin = new Login({
+        document: mockDocument,
+        localStorage: window.localStorage,
+        onNavigate: mockOnNavigate,
+        PREVIOUS_LOCATION: "",
+        store: mockStore,
+      });
+      //if  input correct
+      mockInputData = {
+        type: "Employee",
+        email: "employee@email.com",
+        password: "azerty",
+        status: "connected",
+      };
+
+      const mockUser = mockInputData;
+      mockNewLogin.login = jest.fn().mockResolvedValue("new user");
+      const message = await mockNewLogin.createUser(mockUser);
+
+      expect(message).toBe("new user");
+      expect(screen.getByText("Billed")).toBeTruthy();
     });
-
-    const bills = await mockStore.bills().list();
-    // login()
-    mockLogin.login = jest.fn((user) => {
-      expect(user.type).toBe("Employee");
-      return Promise.reject("Error 404");
-    });
-    //createUser()
-    mockLogin.createUser = jest.fn((user) => {
-      expect(user.type).toBe("Employee");
-      return Promise.resolve(`User with ${user.email} is created`);
-    });
-    const inputEmailUser = screen.getByTestId("employee-email-input");
-    fireEvent.change(inputEmailUser, { target: { value: "chaîne@chaîne" } });
-    expect(inputEmailUser.value).toBe("chaîne@chaîne");
-
-    const inputPasswordUser = screen.getByTestId("employee-password-input");
-    fireEvent.change(inputPasswordUser, { target: { value: "azerty" } });
-    expect(inputPasswordUser.value).toBe("azerty");
-
-    const btnLoginEmployee = screen.getByTestId("employee-login-button");
-    const handleSubmitEmployee = jest.fn((e) => mockLogin.handleSubmitEmployee(e));
-    btnLoginEmployee.addEventListener("click", handleSubmitEmployee);
-    fireEvent.click(btnLoginEmployee);
-    expect(handleSubmitEmployee).toHaveBeenCalled();
-
-    expect(screen.getByText("Billed")).toBeTruthy();
   });
 });
 
@@ -912,7 +790,6 @@ describe("Given that I am a user on login page", () => {
   });
 });
 
-
 describe("When : je entre des informations correctes du login Admin et clique sur le bouton Se connecter", async () => {
   Object.defineProperty(window, "localStorage", { value: localStorageMock });
 
@@ -959,7 +836,6 @@ describe("When : je entre des informations correctes du login Admin et clique su
     await waitFor(screen.getByTestId("big-billed-icon"));
     expect(handleSubmitAdmin).toHaveBeenCalled();
     expect(screen.getByTestId("big-billed-icon")).toBeTruthy();
-    
   });
   test("la méthode handleSubmitAdmin est appelée ,Je devrais être connecté avec succès", async () => {
     const mockLogin = new Login({
@@ -1006,35 +882,35 @@ describe("When : je entre des informations correctes du login Admin et clique su
     expect(handleSubmitAdmin()).toBeNull();
   });
 
-    test("Connexion échouée je reste sur la page login", async () => {
-      const mockLogin = new Login({
-        document,
-        localStorage,
-        onNavigate: mockOnNavigate,
-        PREVIOUS_LOCATION: "",
-        store: {
-          login: jest.fn().mockRejectedValue(new Error("Connexion échoué")),
-          users: () => {
-            return { create: jest.fn().mockRejectedValue("Connexion échoué") };
-          },
+  test("Connexion échouée je reste sur la page login", async () => {
+    const mockLogin = new Login({
+      document,
+      localStorage,
+      onNavigate: mockOnNavigate,
+      PREVIOUS_LOCATION: "",
+      store: {
+        login: jest.fn().mockRejectedValue(new Error("Connexion échoué")),
+        users: () => {
+          return { create: jest.fn().mockRejectedValue("Connexion échoué") };
         },
-      });
-      const inputEmailUser = screen.getByTestId("admin-email-input");
-      fireEvent.change(inputEmailUser, { target: { value: "chaîne@chaîne.com" } });
-      expect(inputEmailUser.value).toBe("chaîne@chaîne.com");
-
-      const inputPasswordUser = screen.getByTestId("admin-password-input");
-      fireEvent.change(inputPasswordUser, { target: { value: "azerty" } });
-      expect(inputPasswordUser.value).toBe("azerty");
-
-      const btnSubmitAdmin = screen.getByTestId("admin-login-button");
-      const handleSubmitAdmin = jest.fn((e) => mockLogin.handleSubmitAdmin(e));
-      btnSubmitAdmin.addEventListener("click", handleSubmitAdmin);
-      fireEvent.click(btnSubmitAdmin);
-
-      expect(handleSubmitAdmin).toHaveBeenCalled();
-      expect(mockLogin.store.login).toHaveBeenCalled();
-      expect(mockLogin.store.create).toHaveBeenCalled();
-      expect(screen.getByTestId("form-admin")).toBeTruthy();
+      },
     });
+    const inputEmailUser = screen.getByTestId("admin-email-input");
+    fireEvent.change(inputEmailUser, { target: { value: "chaîne@chaîne.com" } });
+    expect(inputEmailUser.value).toBe("chaîne@chaîne.com");
+
+    const inputPasswordUser = screen.getByTestId("admin-password-input");
+    fireEvent.change(inputPasswordUser, { target: { value: "azerty" } });
+    expect(inputPasswordUser.value).toBe("azerty");
+
+    const btnSubmitAdmin = screen.getByTestId("admin-login-button");
+    const handleSubmitAdmin = jest.fn((e) => mockLogin.handleSubmitAdmin(e));
+    btnSubmitAdmin.addEventListener("click", handleSubmitAdmin);
+    fireEvent.click(btnSubmitAdmin);
+
+    expect(handleSubmitAdmin).toHaveBeenCalled();
+    expect(mockLogin.store.login).toHaveBeenCalled();
+    expect(mockLogin.store.create).toHaveBeenCalled();
+    expect(screen.getByTestId("form-admin")).toBeTruthy();
+  });
 });
