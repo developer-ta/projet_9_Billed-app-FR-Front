@@ -2,14 +2,14 @@
  * @jest-environment jsdom
  */
 
-import { fireEvent, screen, waitFor } from "@testing-library/dom";
+import { screen, waitFor } from "@testing-library/dom";
 import userEvent from "@testing-library/user-event";
 import BillsUI from "../views/BillsUI.js";
 import { bills } from "../fixtures/bills.js";
 import Bills from "../containers/Bills.js";
 import { localStorageMock } from "../__mocks__/localStorage.js";
 import { ROUTES, ROUTES_PATH } from "../constants/routes.js";
-//import $ from "jquery";
+
 import mockStore from "../__mocks__/store";
 import router from "../app/Router.js";
 import "@testing-library/jest-dom/extend-expect";
@@ -60,13 +60,13 @@ describe("Given I am connected as an employee", () => {
       router();
       window.onNavigate("#employee/bills");
 
-      expect(await screen.getByTestId("icon-window")).toBeTruthy();
-      expect(await screen.getByTestId("icon-window")).toHaveClass("active-icon");
+      expect(screen.getByTestId("icon-window")).toBeTruthy();
+      expect(screen.getByTestId("icon-window")).toHaveClass("active-icon");
       // expect(screen.getByTestId("icon-window").contains("active-icon")).toBe(true);
     });
   });
   //5
-  describe("When I am on Bills Page", () => {
+  describe("When I am on Bills Page 1", () => {
     let isLoading = true;
     let mockBills = [];
 
@@ -112,7 +112,7 @@ describe("Given I am connected as an employee", () => {
       expect(resultDates).toEqual(datesSorted);
     });
   });
-  //2
+  //6
   describe("When I am on Bills Page 2", () => {
     let mockStore = null;
     let mockBills = null;
@@ -121,7 +121,7 @@ describe("Given I am connected as an employee", () => {
     const mockDocument = () => {
       billsDataList = bills;
       document.body.innerHTML = `<div id=root>${BillsUI({ data: billsDataList })}</div>`;
-      //console.log("BillsUI({ data: mockBills }: ", VerticalLayout(120));
+
       document.title = "Bills";
       return document;
     };
@@ -164,19 +164,15 @@ describe("Given I am connected as an employee", () => {
       const $iconEyes = screen.getAllByTestId("icon-eye");
 
       let mockHandleClickIconEye = jest.fn((icon) => mockBills.handleClickIconEye(icon));
-      // mockHandleClickIconEye.mockReturnValue();
+
       $iconEyes.forEach(($iconEye) => {
         $iconEye.addEventListener("click", () => mockHandleClickIconEye($iconEye));
       });
 
-      // let handleClickIconEyeSpy = jest.spyOn(mockBills, "handleClickIconEye").mockReturnValue("called");
       userEvent.click($iconEyes[0]);
-      //mockBills.handleClickIconEye();
       await waitFor(() => $("#myModal"));
-      //expect($("#myModal").hasClass("show")).toBe(true);
       expect(mockBills.document.title).toEqual("Bills");
       expect(mockHandleClickIconEye).toHaveBeenCalled();
-      //  expect(mockBills.handleClickIconEye()).toEqual("called");
     });
 
     test("Then, should appear NewBill", async () => {
@@ -194,7 +190,7 @@ describe("Given I am connected as an employee", () => {
       expect(handleClickNewBill).toHaveBeenCalled();
     });
 
-    test("Then, should appear NewBill 2", async () => {
+    test("Then, should handleClickNewBill called and appear NewBill ", async () => {
       await waitFor(() => screen.getByTestId("btn-new-bill"));
 
       const handleClickNewBill = jest.fn((e) => mockBills.handleClickNewBill(e));
@@ -210,8 +206,8 @@ describe("Given I am connected as an employee", () => {
       expect(handleClickNewBill).toHaveBeenCalled();
     });
   });
-  //2.1
-  describe("When I am on Bills Page 2.1", () => {
+  //7
+  describe("When I am on Bills Page 3", () => {
     beforeEach(() => {
       jest.mock("../app/Store.js", () => {
         mockStore;
@@ -232,7 +228,7 @@ describe("Given I am connected as an employee", () => {
       jest.clearAllMocks();
     });
 
-    test("Then, should appear Bills list ", async () => {
+    test("Then,Devrait model justificatif apparaître ,lorsque je clique sur iconEyes", async () => {
       const mockOnNavigate = (data, error) =>
         (document.body.innerHTML = `<div id=root>${BillsUI({ data, error })}</div>`);
 
@@ -244,7 +240,6 @@ describe("Given I am connected as an employee", () => {
       });
       const data = await mockBills.getBills();
       mockBills.onNavigate(data, "");
-      //console.log("data==================: ", data);
 
       document.title = "Bills";
 
@@ -253,21 +248,19 @@ describe("Given I am connected as an employee", () => {
       const $iconEyes = screen.getAllByTestId("icon-eye");
 
       let mockHandleClickIconEye = jest.fn((icon) => mockBills.handleClickIconEye(icon));
-      // mockHandleClickIconEye.mockReturnValue();
+
       $iconEyes.forEach(($iconEye) => {
         $iconEye.addEventListener("click", () => mockHandleClickIconEye($iconEye));
       });
 
-      // let handleClickIconEyeSpy = jest.spyOn(mockBills, "handleClickIconEye").mockReturnValue("called");
       userEvent.click($iconEyes[0]);
-      //mockBills.handleClickIconEye();
+
       await waitFor(() => $("#myModal"));
       expect($("#myModal")).toBeTruthy();
       expect(mockBills.document.title).toEqual("Bills");
       expect(mockHandleClickIconEye).toHaveBeenCalled();
-      //  expect(mockBills.handleClickIconEye()).toEqual("called");
     });
-    test("Then, should appear Bill 4", async () => {
+    test("Then, Devrait avoir Liste de billes ,lorsqu'on appelle méthode getBills", async () => {
       //1 div root
 
       document.body.innerHTML = `<div id=root></div>`;
@@ -294,62 +287,13 @@ describe("Given I am connected as an employee", () => {
       });
       let res = await billsInstance.getBills();
 
-      // expect(billsInstance.store.bills).toHaveBeenCalled();
       expect(res).not.toBeNull();
 
       billsInstance.store = null;
       res = await billsInstance.getBills();
       expect(res).toBeUndefined();
     });
-    test("Then, should appear getBills = () error occur ", async () => {
-      //1 div root
-      jest.mock("../containers/Bills.js");
-      document.body.innerHTML = `<div id=root></div>`;
-      //2 mockStore
-      const mockStore = {
-        bills: () => {
-          return {
-            list: () => {
-              return Promise.reject("Erreur 404");
-            },
-          };
-        },
-      };
-
-      // 3. Fonction mockOnNavigate
-      const mockOnNavigate = jest.fn();
-
-      //4 new Bills
-      const mockBills = new Bills({
-        document,
-        onNavigate: mockOnNavigate,
-        store: mockStore,
-        localStorage,
-      });
-      // Implementer la méthode getBills pour simuler la récupération
-      mockBills.getBills = jest.fn(() => {
-        return mockStore.bills().list();
-      });
-      try {
-        await mockBills.getBills();
-      } catch (error) {
-        const rootDiv = document.getElementById("root");
-        rootDiv.innerHTML = ROUTES({ pathname: ROUTES_PATH.Bills, error });
-        expect(rootDiv.innerHTML).toContain("Erreur 404");
-      }
-
-      await new Promise(process.nextTick);
-
-      document.title = "Bills";
-      await waitFor(() => screen.getByTestId("error-message"));
-      let messageError = screen.getByTestId("error-message").innerHTML;
-
-      expect(screen.getByTestId("error-message")).toBeTruthy();
-
-      expect(mockBills.document.title).toEqual("Bills");
-    });
-
-    test("Then, should appear getBills = () error occur ", async () => {
+    test("Then,  Devrait avoir Erreur 404 ,lorsqu'on appelle méthode getBills", async () => {
       //1 div root
       jest.mock("../containers/Bills.js");
       document.body.innerHTML = `<div id=root></div>`;
@@ -397,5 +341,4 @@ describe("Given I am connected as an employee", () => {
       expect(mockBills.document.title).toEqual("Bills");
     });
   });
-  // 3
 });
