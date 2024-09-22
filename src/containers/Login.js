@@ -65,13 +65,13 @@ export default class Login {
     return (
       this.login(user) &&
       this.login(user)
-        .catch((err) => this.createUser(user))
         .then(() => {
           this.onNavigate(ROUTES_PATH["Dashboard"]);
           this.PREVIOUS_LOCATION = ROUTES_PATH["Dashboard"];
           PREVIOUS_LOCATION = this.PREVIOUS_LOCATION;
           document.body.style.backgroundColor = "#fff";
         })
+        .catch((err) => this.createUser(user))
     );
   };
 
@@ -143,7 +143,6 @@ export default class Login {
           }),
         })
         .then(() => {
-         
           return this.login(user);
         });
     } else {
