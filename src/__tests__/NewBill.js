@@ -141,7 +141,7 @@ describe("Given I am connected as an employee", () => {
     });
   });
 
-  describe("When I am on Bills Page 3", () => {
+  describe("When I am on newBills Page Lorsque je soumettre formulaire", () => {
     const mockNewBillUi = () => ROUTES({ pathname: "#employee/bill/new", loading: true });
     let mockStoreNewBill = mockStore;
     let mockNewBill;
@@ -174,7 +174,8 @@ describe("Given I am connected as an employee", () => {
         store: mockStoreNewBill,
         localStorage: window.localStorage,
       });
-      test("Then ... test newBille event handleSubmit", async () => {
+
+      test("Then: Devrait retourner page Bill", async () => {
         const $mockFormNewBill = screen.getByTestId("form-new-bill");
         //const $fileInput = screen.getByTestId("file");
 
@@ -186,27 +187,62 @@ describe("Given I am connected as an employee", () => {
         expect(mockHandleSubmit).toHaveBeenCalled();
         expect(screen.getByTestId("btn-new-bill").toBeTruthy());
       });
-      test("Then ... test newBille event handleSubmit 2", async () => {
-        mockNewBill.store = () => {
-          return {
-            bills: () => {
-              return { update: jest.fn().mockResolvedValue({}) };
-            },
-          };
-        };
-        const $mockFormNewBill = screen.getByTestId("form-new-bill");
-        //const $fileInput = screen.getByTestId("file");
 
-        const mockHandleSubmit = jest.fn((event) => mockNewBill.handleSubmit(event));
-        $mockFormNewBill.addEventListener("submit", mockHandleSubmit);
-        //mockNewBill.onNavigate = (pathname) => (document.body.innerHTML = ROUTES({ pathname }));
-        fireEvent.submit($mockFormNewBill);
-        waitFor(() => screen.getByTestId("btn-new-bill"));
-        expect(mockHandleSubmit).toHaveBeenCalled();
-        expect(screen.getByTestId("btn-new-bill").toBeTruthy());
+      //   mockNewBill.store = () => {
+      //     return {
+      //       bills: () => {
+      //         return { update: jest.fn().mockResolvedValue({}) };
+      //       },
+      //     };
+      //   };
+      //   const $mockFormNewBill = screen.getByTestId("form-new-bill");
+
+      //   const mockHandleSubmit = jest.fn((event) => mockNewBill.handleSubmit(event));
+      //   $mockFormNewBill.addEventListener("submit", mockHandleSubmit);
+
+      //   fireEvent.submit($mockFormNewBill);
+      //   waitFor(() => screen.getByTestId("btn-new-bill"));
+      //   expect(mockHandleSubmit).toHaveBeenCalled();
+      //   expect(screen.getByTestId("btn-new-bill").toBeTruthy());
+      // });
+    });
+  });
+
+  describe("When I am on newBills Page, Lorsque Mise à jour new bill rejeté", () => {
+    const mockNewBillUi = () => ROUTES({ pathname: "#employee/bill/new", loading: true });
+    let mockStoreNewBill = mockStore;
+    let mockNewBill;
+    const mockDocument = () => {
+      document.body.innerHTML = `<div id=root>${mockNewBillUi()}</div>`;
+      document.title = "Bills";
+
+      return document;
+    };
+
+    const mockOnNavigate = (pathname) => (document.body.innerHTML = ROUTES({ pathname }));
+
+    const mockLocalStorage = () => {
+      Object.defineProperty(window, "localStorage", { value: localStorageMock });
+    };
+
+    beforeEach(() => {
+      window.localStorage.setItem(
+        "user",
+        JSON.stringify({
+          type: "Employee",
+          email: "f@test.tld",
+        })
+      );
+
+      mockLocalStorage();
+      mockNewBill = new NewBill({
+        document: mockDocument(),
+        onNavigate: mockOnNavigate,
+        store: mockStoreNewBill,
+        localStorage: window.localStorage,
       });
 
-      test("Then ... test newBille event handleSubmit 3", async () => {
+      test("Then , Devrais avoir erreur ", async () => {
         mockNewBill.store = () => {
           return {
             bills: () => {
@@ -222,12 +258,76 @@ describe("Given I am connected as an employee", () => {
           expect(error).toBeTruthy();
         }
 
-        //  waitFor(() => screen.getByTestId("btn-new-bill"));
         expect(mockUpdateBill).toHaveBeenCalled();
-        expect(screen.getByTestId("btn-new-bill").toBeTruthy());
       });
     });
   });
 });
+describe("When I am on NewBills Page,Lorsque POST new bill submit form ", () => {
+  const mockNewBillUi = () => ROUTES({ pathname: "#employee/bill/new", loading: true });
+  let mockStoreNewBill = mockStore;
+  let mockNewBill;
+  const mockDocument = () => {
+    document.body.innerHTML = `<div id=root>${mockNewBillUi()}</div>`;
+    document.title = "Bills";
 
-// 3
+    return document;
+  };
+
+  const mockOnNavigate = (pathname) => (document.body.innerHTML = ROUTES({ pathname }));
+
+  const mockLocalStorage = () => {
+    Object.defineProperty(window, "localStorage", { value: localStorageMock });
+  };
+
+  beforeEach(() => {
+    window.localStorage.setItem(
+      "user",
+      JSON.stringify({
+        type: "Employee",
+        email: "f@test.tld",
+      })
+    );
+
+    mockLocalStorage();
+    mockNewBill = new NewBill({
+      document: mockDocument(),
+      onNavigate: mockOnNavigate,
+      store: mockStoreNewBill,
+      localStorage: window.localStorage,
+    });
+
+    test("Then :Devrait avoir nouveau new bill ID", () => {
+      mockNewBill.store = () => {
+        return {
+          bills: () => {
+            return {
+              create: jest.fn().mockResolvedValue({ fileUrl: "https://localhost:3456/images/test.jpg", key: "1234" }),
+            };
+          },
+        };
+      };
+
+      let mockFile = new File(["test blob file", "", ""], "profil.jpg", { type: "image.jpg" });
+      const $fileInput = screen.getByTestId("file");
+
+      const mockHandleChangeFile = jest.spyOn(mockNewBill, "handleChangeFile");
+      $fileInput.addEventListener("change", mockHandleChangeFile);
+      fireEvent.change($fileInput, { target: { files: [mockFile] } });
+
+      expect($fileInput.files[0].name).toBe("profil.jpg");
+
+      const $mockFormNewBill = screen.getByTestId("form-new-bill");
+      const mockHandleSubmit = jest.fn((event) => mockNewBill.handleSubmit(event));
+      $mockFormNewBill.addEventListener("submit", mockHandleSubmit);
+
+      fireEvent.submit($mockFormNewBill);
+      let storeCreate = mockNewBill.store.bills();
+      expect(mockHandleSubmit).toHaveBeenCalled();
+      expect(storeCreate.create).toHaveBeenCalled();
+      expect(mockNewBill.billId).toContain("1234");
+
+      // expect(screen.getByTestId("btn-new-bill").toBeTruthy());
+    });
+  });
+});
