@@ -340,6 +340,7 @@ describe("Given : Je suis un utilisateur non connecté sur la page de login avec
         })
       );
       expect(login.login).toHaveBeenCalled();
+     
     });
     test("It should renders  bills page", () => {
       expect(screen.queryByText("Mes notes de frais")).toBeTruthy();

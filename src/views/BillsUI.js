@@ -51,7 +51,6 @@ const rows = (data) => {
         };
       })
       .sort(antiChrono); //trier date pour order triée de index data list
-
     const res = dataIndexesSorted.map(({ index }) => data[index]);
     return res.map((d) => row(d)).join("");
   }
