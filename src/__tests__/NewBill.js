@@ -7,11 +7,12 @@ import { fireEvent, screen, waitFor, queryByTestId } from "@testing-library/dom"
 
 import { localStorageMock } from "../__mocks__/localStorage.js";
 import { ROUTES, ROUTES_PATH } from "../constants/routes.js";
-
+import { bills } from "../fixtures/bills.js";
 import mockStore from "../__mocks__/store";
 import Router from "../app/Router";
 
 jest.mock("../app/store", () => mockStore);
+
 describe("Given I am connected as an employee", () => {
   describe("When I am on NewBill Page", () => {
     //  préparation l'environnement des test
@@ -40,18 +41,13 @@ describe("Given I am connected as an employee", () => {
       });
     });
 
-    // window.location.hash = "#employee/bill/new";
-    // // window.on = "#employee/bill/new";
-    // window.onNavigate("#employee/bill/new");
-
     afterEach(() => {
       document.body.innerHTML = "";
       jest.clearAllMocks();
     });
     // Test partie interface graphique
-    test("Then ... test newBilleUi", () => {
+    test("Then,should test newBille Ui", () => {
       expect(screen.getByTestId("form-new-bill")).toBeTruthy();
-      // expect($fileInput).toBeTruthy();
       expect(screen.getByTestId("expense-type")).toBeTruthy();
       expect(screen.getByTestId("expense-name")).toBeTruthy();
       expect(screen.getByTestId("datepicker")).toBeTruthy();
@@ -64,22 +60,21 @@ describe("Given I am connected as an employee", () => {
     });
 
     //test level newBille constructor
-    test("Then ... test newBille constructor", () => {
+    test("Then,Devrait avoir un instant de newBille ", () => {
       expect(mockNewBill.document.title).toEqual("newBille");
       expect(mockNewBill.$errorSpan.style.display).toEqual("none");
     });
 
     //test level newBille Dowland file event
-    test("Then ... test newBille event handleChangeFile", () => {
+    test("Then,Devrais télécharger un fichier image , lorsque on appelle  handleChangeFile", () => {
       let mockFile = new File(["test blob file", "", ""], "profil.jpg", { type: "image.jpg" });
       const $fileInput = screen.getByTestId("file");
       const $btnSubmit = screen.getByText("Envoyer");
-      // $btnSubmit = document.querySelector("#btn-send-bill");
+
       const mockHandleChangeFile = jest.spyOn(mockNewBill, "handleChangeFile");
       $fileInput.addEventListener("change", mockHandleChangeFile);
       fireEvent.change($fileInput, { target: { files: [mockFile] } });
 
-      //expect($mockFormNewBill).toBeTruthy();
       expect($fileInput).toBeTruthy();
       expect($btnSubmit.disabled).toBe(false);
       expect($fileInput.files).toBeTruthy();
@@ -87,7 +82,7 @@ describe("Given I am connected as an employee", () => {
       expect($fileInput.files[0].name).toBe("profil.jpg");
       expect(mockHandleChangeFile).toHaveBeenCalled();
     });
-    test("Then ... test newBille event handleChangeFile if ", () => {
+    test("Then,Un message d'erreur apparaît pour m'avertir de télécharger uniquement des fichiers de type PNG, JPG ou JPEG ", () => {
       let mockFile = new File(["test blob file"], "profil.txt", {
         type: "text/plain",
         lastModified: new Date(),
@@ -98,7 +93,6 @@ describe("Given I am connected as an employee", () => {
       $fileInput.addEventListener("change", mockHandleChangeFile);
       fireEvent.change($fileInput, { target: { files: [mockFile] } });
 
-      //expect($mockFormNewBill).toBeTruthy();
       expect($fileInput).toBeTruthy();
       expect($errorSpan.style.display).toBe("block");
       expect(mockHandleChangeFile).toHaveBeenCalled();
@@ -106,7 +100,7 @@ describe("Given I am connected as an employee", () => {
       expect($fileInput.files[0].name).toBe("profil.txt");
     });
 
-    test("Then ... test newBille event handleChangeFile if correct ", () => {
+    test("Then, Devrait n'y a aucune erreur ou alerte qui s'affiche , lorsque je sélectionne un fichier de type PNG ", () => {
       let mockFile = new File(["test blob file"], "profil.png", {
         type: "text/plain",
         lastModified: new Date(),
@@ -148,11 +142,11 @@ describe("Given I am connected as an employee", () => {
   });
 
   describe("When I am on Bills Page 3", () => {
-    const mockNewBillUI = () => ROUTES({ pathname: "#employee/bill/new", loading: true });
+    const mockNewBillUi = () => ROUTES({ pathname: "#employee/bill/new", loading: true });
     let mockStoreNewBill = mockStore;
-
+    let mockNewBill;
     const mockDocument = () => {
-      document.body.innerHTML = `<div id=root>${mockNewBillUI()}</div>`;
+      document.body.innerHTML = `<div id=root>${mockNewBillUi()}</div>`;
       document.title = "Bills";
 
       return document;
@@ -162,6 +156,9 @@ describe("Given I am connected as an employee", () => {
 
     const mockLocalStorage = () => {
       Object.defineProperty(window, "localStorage", { value: localStorageMock });
+    };
+
+    beforeEach(() => {
       window.localStorage.setItem(
         "user",
         JSON.stringify({
@@ -169,34 +166,65 @@ describe("Given I am connected as an employee", () => {
           email: "f@test.tld",
         })
       );
-    };
 
-    beforeEach(() => {
       mockLocalStorage();
-      mockNewBillUI = new NewBill({
+      mockNewBill = new NewBill({
         document: mockDocument(),
         onNavigate: mockOnNavigate,
         store: mockStoreNewBill,
         localStorage: window.localStorage,
       });
+      test("Then ... test newBille event handleSubmit", async () => {
+        const $mockFormNewBill = screen.getByTestId("form-new-bill");
+        //const $fileInput = screen.getByTestId("file");
 
-      test("Then, should appear NewBill 3", async () => {
-        await waitFor(() => screen.getByTestId("btn-new-bill"));
+        const mockHandleSubmit = jest.spyOn(mockNewBill, "handleSubmit");
+        $mockFormNewBill.addEventListener("submit", mockHandleSubmit);
+        //mockNewBill.onNavigate = (pathname) => (document.body.innerHTML = ROUTES({ pathname }));
+        fireEvent.submit($mockFormNewBill);
+        waitFor(() => screen.getByTestId("btn-new-bill"));
+        expect(mockHandleSubmit).toHaveBeenCalled();
+        expect(screen.getByTestId("btn-new-bill").toBeTruthy());
+      });
+      test("Then ... test newBille event handleSubmit 2", async () => {
+        mockNewBill.store = () => {
+          return {
+            bills: () => {
+              return { update: jest.fn().mockResolvedValue({}) };
+            },
+          };
+        };
+        const $mockFormNewBill = screen.getByTestId("form-new-bill");
+        //const $fileInput = screen.getByTestId("file");
 
-        console.log("document: ", document.body.innerHTML);
-        const handleClickNewBill = jest.fn((e) => mockBills.handleClickNewBill(e));
-        const $newBillBtn = screen.getByTestId("btn-new-bill");
+        const mockHandleSubmit = jest.fn((event) => mockNewBill.handleSubmit(event));
+        $mockFormNewBill.addEventListener("submit", mockHandleSubmit);
+        //mockNewBill.onNavigate = (pathname) => (document.body.innerHTML = ROUTES({ pathname }));
+        fireEvent.submit($mockFormNewBill);
+        waitFor(() => screen.getByTestId("btn-new-bill"));
+        expect(mockHandleSubmit).toHaveBeenCalled();
+        expect(screen.getByTestId("btn-new-bill").toBeTruthy());
+      });
 
-        $newBillBtn.addEventListener("click", handleClickNewBill);
+      test("Then ... test newBille event handleSubmit 3", async () => {
+        mockNewBill.store = () => {
+          return {
+            bills: () => {
+              return { update: jest.fn().mockRejectedValue(new Error("error")) };
+            },
+          };
+        };
 
-        userEvent.click($newBillBtn);
+        const mockUpdateBill = jest.fn(() => mockNewBill.updateBill(bills));
+        try {
+          await mockUpdateBill();
+        } catch (error) {
+          expect(error).toBeTruthy();
+        }
 
-        expect(screen.getByText("Billed")).toBeTruthy();
-        expect(screen.getByTestId("icon-window")).toBeTruthy();
-        expect(screen.getByTestId("icon-mail")).toBeTruthy();
-        //  expect(screen.getByTestId("tbody")).toBeTruthy();
-        expect($newBillBtn).toBeTruthy();
-        expect(handleClickNewBill).toHaveBeenCalled();
+        //  waitFor(() => screen.getByTestId("btn-new-bill"));
+        expect(mockUpdateBill).toHaveBeenCalled();
+        expect(screen.getByTestId("btn-new-bill").toBeTruthy());
       });
     });
   });

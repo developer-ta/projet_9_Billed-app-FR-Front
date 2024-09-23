@@ -20,11 +20,11 @@ const row = (bill) => {
 };
 
 const rows = (data) => {
-  const antiChrono = (a, b) => (a.date < b.date ? 1 : -1);
   //const antiChrono = (a, b) => (a < b ? 1 : -1);
   // const datesSorted = [...dates].sort(antiChrono);
   //const antiChrono = (a, b) => new Date(b.date) - new Date(a.date);
   // const antiChrono = (a, b) => new Date(a.date).valueOf() - new Date(b.date).valueOf();
+  const antiChrono = (a, b) => (a.date < b.date ? 1 : -1);
   const mois = {
     Jan: "Jan",
     Fév: "Feb",
@@ -50,18 +50,15 @@ const rows = (data) => {
           index: index,
         };
       })
-      .sort(antiChrono);
+      .sort(antiChrono); //trier date pour order triée de index data list
 
     const res = dataIndexesSorted.map(({ index }) => data[index]);
-  
-
     return res.map((d) => row(d)).join("");
   }
   return "";
 };
 
 export default ({ data: bills, loading, error }) => {
- 
   const modal = () => `
     <div class="modal fade" id="modaleFile" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
       <div class="modal-dialog modal-dialog-centered modal-lg" role="document">

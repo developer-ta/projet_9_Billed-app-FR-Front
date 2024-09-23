@@ -29,7 +29,7 @@ export default class NewBill {
     const isMatchedFileType = ["png", "jpg", "jpeg"].includes(fileTypeName);
     const $btnSubmit = document.querySelector("#btn-send-bill");
 
-    debugger;
+    
     if (!isMatchedFileType) {
       this.$errorSpan.style.display = "block";
       $btnSubmit.disabled = true;
@@ -85,6 +85,7 @@ export default class NewBill {
   // not need to cover this function by tests
   updateBill = (bill) => {
     if (this.store) {
+      
       this.store
         .bills()
         .update({ data: JSON.stringify(bill), selector: this.billId })
